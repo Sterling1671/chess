@@ -1,1 +1,2 @@
-# My Notes: I'm excited to learn Javals
+# My Notes:
+I'm excited to learn Java!
