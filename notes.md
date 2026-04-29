@@ -1,3 +1,2 @@
 # My Notes:
 I'm excited to learn Java!
-I think I have to change the commit message for the autograder to work...
