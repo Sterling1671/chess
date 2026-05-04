@@ -53,11 +53,24 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
         PieceMovesCalculator calculator;
+        // maybe switch is better
         if(piece.getPieceType() == PieceType.BISHOP) {
             calculator = new BishopMovesCalculator();
         }
         else if(piece.getPieceType() == PieceType.QUEEN){
             calculator = new QueenMovesCalculator();
+        }
+        else if(piece.getPieceType() == PieceType.KNIGHT){
+            calculator = new KnightMovesCalculator();
+        }
+        else if(piece.getPieceType() == PieceType.PAWN){
+            calculator = new PawnMovesCalculator();
+        }
+        else if(piece.getPieceType() == PieceType.ROOK){
+            calculator = new RookMovesCalculator();
+        }
+        else if(piece.getPieceType() == PieceType.KING){
+            calculator = new KingMovesCalculator();
         }
         else{
             return List.of();
