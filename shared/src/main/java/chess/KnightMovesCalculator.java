@@ -1,11 +1,41 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class KnightMovesCalculator implements PieceMovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return List.of();
+        List<ChessMove> validMoves = new ArrayList<>();
+        ChessPosition[] validDirections = {
+                new ChessPosition(2,1),
+                new ChessPosition(2,-1),
+                new ChessPosition(-2,1),
+                new ChessPosition(-2,-1),
+                new ChessPosition(1,2),
+                new ChessPosition(-1,2),
+                new ChessPosition(1,-2),
+                new ChessPosition(-1,-2)
+        };
+        // This is the piece that is being passed in
+        ChessPiece originalPiece = board.getPiece(myPosition);
+
+        // Loop that goes through directions... Fancy
+        for(ChessPosition direction : validDirections){
+            // I made a copy constructor for ChessPosition bc Java uses copy by reference
+            ChessPosition tileToCheck = myPosition.add(direction);
+            if(checkInBounds(tileToCheck)){
+                ChessPiece piece = board.getPiece(tileToCheck);
+                if(piece == null){
+                    // Adds the move to the list if the square is empty
+                    validMoves.add(new ChessMove(myPosition, tileToCheck, null));
+                }
+                else if(piece.getTeamColor() != originalPiece.getTeamColor()){
+                    validMoves.add(new ChessMove(myPosition, tileToCheck, null));
+                }
+            }
+        }
+        return validMoves;
     }
 }
