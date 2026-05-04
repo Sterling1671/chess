@@ -52,9 +52,13 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
+        PieceMovesCalculator calculator;
         if(piece.getPieceType() == PieceType.BISHOP){
-            return List.of(new ChessMove(new ChessPosition(1,3), new ChessPosition(5,5), null));
+            calculator = new BishopMovesCalculator();
         }
-        return List.of();
+        else{
+            return List.of();
+        }
+        return calculator.pieceMoves(board, myPosition);
     }
 }
