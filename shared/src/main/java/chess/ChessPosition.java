@@ -16,6 +16,11 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public ChessPosition(ChessPosition other){
+        this.row = other.getRow();
+        this.col = other.getColumn();
+    }
+
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
@@ -30,6 +35,13 @@ public class ChessPosition {
      */
     public int getColumn() {
         return col;
+    }
+
+    /**
+     * @return a new ChessPosition that has rows and columns added with the current one
+     */
+    public ChessPosition add(ChessPosition other){
+        return new ChessPosition(row + other.getRow(), col + other.getColumn());
     }
 
     @Override
