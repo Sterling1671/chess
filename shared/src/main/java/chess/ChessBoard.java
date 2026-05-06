@@ -17,7 +17,14 @@ public class ChessBoard {
     public ChessBoard(ChessBoard other){
         for(int i = 0; i < this.squares.length; i++){
             for(int j = 0; j < this.squares[i].length; j++) {
-                this.squares[i][j] = new ChessPiece(other.squares[i][j]);
+                // Added null checker bc memory is scary
+                if(other.squares[i][j] == null){
+                    this.squares[i][j] = null;
+                }
+                else {
+                    this.squares[i][j] = new ChessPiece(other.squares[i][j]);
+                }
+
             }
        }
     }

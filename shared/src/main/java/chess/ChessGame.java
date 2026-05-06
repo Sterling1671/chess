@@ -10,6 +10,7 @@ import java.util.*;
  */
 public class ChessGame {
     ChessBoard board = new ChessBoard();
+    TeamColor currentTeamTurn = TeamColor.WHITE;
     public ChessGame() {
 
     }
@@ -18,7 +19,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return currentTeamTurn;
     }
 
     /**
@@ -27,7 +28,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        currentTeamTurn = team;
     }
 
     /**
@@ -50,14 +51,20 @@ public class ChessGame {
         List<ChessMove> uncheckedMoves = new ArrayList<>(piece.pieceMoves(board, startPosition));
         List<ChessMove> validMoves = new ArrayList<>();
         for(ChessMove move : uncheckedMoves){
-
+            if(this.TestMoveValidity(move)){
+                validMoves.add(move);
+            }
         }
         return validMoves;
     }
 
-
+    /**
+     * Gets all valid moves for a piece at the given location
+     *
+     * @param move the move to check
+     * @return true if the move is valid, false if not
+     */
     public boolean TestMoveValidity(ChessMove move){
-        // TODO there could be memory error here, idk if these are copying or not
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
@@ -74,7 +81,7 @@ public class ChessGame {
         board.addPiece(start, piece);
         board.addPiece(end, takenPiece);
 
-        return invalid;
+        return !invalid;
     }
 
     /**
