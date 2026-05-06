@@ -1,8 +1,7 @@
 package chess;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -35,6 +34,48 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
+    }
+
+    /**
+     * Gets the position of the king on the chessboard
+     * @param teamColor the team of the king you want to find
+     * @return the position of the king
+     */
+    public ChessPosition getKingPosition(ChessGame.TeamColor teamColor) {
+        for(int i = 0; i < squares.length; i++){
+            for(int j = 0; j < squares[i].length; j++){
+                ChessPiece piece = squares[i][j];
+                if(piece != null){
+                    if(piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor){
+                        return new ChessPosition(i+1,j+1);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Gets all valid moves a team can currently make. Doesn't check for extra rules
+     * @param teamColor the team you want to get moves for
+     * @return the collection of all moves
+     */
+    public Collection<ChessMove> getTeamMoves(ChessGame.TeamColor teamColor) {
+        Set<ChessMove> teamMoves = new HashSet<>();
+        for(int i = 0; i < squares.length; i++) {
+            for (int j = 0; j < squares[i].length; j++) {
+                if(squares[i][j] != null){
+                    if(squares[i][j].getTeamColor() == teamColor){
+                        ChessPiece piece = squares[i][j];
+                        ChessPosition position = new ChessPosition(i+1,j+1);
+                        Collection<ChessMove> pieceMoves = piece.pieceMoves(this, position);
+                        teamMoves.addAll(pieceMoves);
+                    }
+                }
+            }
+        }
+        return teamMoves;
     }
 
     /**
