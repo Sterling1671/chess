@@ -1,6 +1,6 @@
 package chess;
 
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -46,7 +46,35 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        List<ChessMove> uncheckedMoves = new ArrayList<>(piece.pieceMoves(board, startPosition));
+        List<ChessMove> validMoves = new ArrayList<>();
+        for(ChessMove move : uncheckedMoves){
+
+        }
+        return validMoves;
+    }
+
+
+    public boolean TestMoveValidity(ChessMove move){
+        // TODO there could be memory error here, idk if these are copying or not
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece piece = board.getPiece(start);
+        ChessPiece takenPiece = board.getPiece(end);
+
+        // Make the move
+        board.addPiece(end, piece);
+        board.addPiece(start, null);
+
+        // Check the move
+        boolean invalid = this.isInCheck(piece.getTeamColor());
+
+        // Puts the board back
+        board.addPiece(start, piece);
+        board.addPiece(end, takenPiece);
+
+        return invalid;
     }
 
     /**
@@ -66,7 +94,21 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-
+        TeamColor otherColor;
+        if(teamColor == TeamColor.WHITE)
+            otherColor = TeamColor.BLACK;
+        else{
+            otherColor = TeamColor.WHITE;
+        }
+        // Gets all the moves of the opposing team
+        Set<ChessMove> otherTeamMoves = new HashSet<>(board.getTeamMoves(otherColor));
+        Set<ChessPosition> finalPositions = new HashSet<>();
+        // Gets the final position
+        for(ChessMove move : otherTeamMoves){
+            finalPositions.add(move.getEndPosition());
+        }
+        // If any of the final positions are the kings position, it's in check
+        return finalPositions.contains(board.getKingPosition(teamColor));
     }
 
     /**

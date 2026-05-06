@@ -14,7 +14,13 @@ public class ChessBoard {
     public ChessBoard() {
         
     }
-
+    public ChessBoard(ChessBoard other){
+        for(int i = 0; i < this.squares.length; i++){
+            for(int j = 0; j < this.squares[i].length; j++) {
+                this.squares[i][j] = new ChessPiece(other.squares[i][j]);
+            }
+       }
+    }
     /**
      * Adds a chess piece to the chessboard
      *
@@ -96,7 +102,9 @@ public class ChessBoard {
         Array.set(squares[0],6,new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
         Array.set(squares[0],7,new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
 
-        Arrays.fill(squares[1], new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+        for(int i = 0; i < squares[1].length;i++){
+            Array.set(squares[1],i,new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+        }
 
         // Hardcode the configuration for black
         Array.set(squares[7],0,new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
@@ -108,8 +116,9 @@ public class ChessBoard {
         Array.set(squares[7],6,new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
         Array.set(squares[7],7,new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
 
-        Arrays.fill(squares[6], new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
-
+        for(int i = 0;i < squares[6].length;i++) {
+            Array.set(squares[6], i, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
 
 
 
