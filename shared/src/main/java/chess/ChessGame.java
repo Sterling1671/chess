@@ -12,7 +12,7 @@ public class ChessGame {
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
     public ChessGame() {
-
+        board.resetBoard();
     }
 
     /**
@@ -185,7 +185,19 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Make sure the king is actually in check
+        if(this.isInCheck(teamColor)) return false;
+
+        // This is all the moves the team can make
+        List<ChessMove> teamMoves = new ArrayList<>(board.getTeamMoves(teamColor));
+        List<ChessMove> validMoves = new ArrayList<>();
+
+        for(ChessMove move : teamMoves){
+            if(this.TestMoveValidity(move)){
+                validMoves.add(move);
+            }
+        }
+        return validMoves.isEmpty();
     }
 
     /**
