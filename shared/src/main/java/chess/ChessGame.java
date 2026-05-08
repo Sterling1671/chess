@@ -101,17 +101,24 @@ public class ChessGame {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece pieceToMove = board.getPiece(start);
-        // Gets all valid moves that start position could make
-        List<ChessMove> validMoves = new ArrayList<>(this.validMoves(start));
 
         // Checks if piece exists
         if(pieceToMove == null) throw new InvalidMoveException("Invalid Move");
+        // Gets all valid moves that start position could make
+        List<ChessMove> validMoves = new ArrayList<>(this.validMoves(start));
         // Checks if piece is the right turn
         if(pieceToMove.getTeamColor() != currentTeamTurn) throw new InvalidMoveException("Invalid Move");
         // Makes sure the move given is in the validMoves array
         if(!validMoves.contains(move)) throw new InvalidMoveException("Invalid Move");
         // If none of these throw anything then make the move
-        board.addPiece(end, pieceToMove);
+        // Also do pawn promotion thingy
+        ChessPiece.PieceType pieceToPlaceType = move.getPromotionPiece();
+        // This gets the new piece. If it's a promotion do that if not just make a copy of old piece
+        ChessPiece pieceToPlace = pieceToPlaceType == null ?
+                new ChessPiece(pieceToMove) :
+                new ChessPiece(pieceToMove.getTeamColor(),pieceToPlaceType);
+        // Actually add the piece and change turn
+        board.addPiece(end, pieceToPlace);
         board.addPiece(start, null);
         this.changeTurn();
 
