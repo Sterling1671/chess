@@ -48,13 +48,20 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
+
+        // Makes sure there's a piece here
+        if(piece == null) return null;
+
+        // unchecked moves is filled with all the possible moves from pieceMoves
         List<ChessMove> uncheckedMoves = new ArrayList<>(piece.pieceMoves(board, startPosition));
         List<ChessMove> validMoves = new ArrayList<>();
+        // Each move is checked for validity and only then moved to validMoves
         for(ChessMove move : uncheckedMoves){
             if(this.TestMoveValidity(move)){
                 validMoves.add(move);
             }
         }
+
         return validMoves;
     }
 
@@ -91,7 +98,23 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece pieceToMove = board.getPiece(start);
+        // Gets all valid moves that start position could make
+        List<ChessMove> validMoves = new ArrayList<>(this.validMoves(start));
+
+        // Checks if piece exists
+        if(pieceToMove == null) throw new InvalidMoveException("Invalid Move");
+        // Checks if piece is the right turn
+        if(pieceToMove.getTeamColor() != currentTeamTurn) throw new InvalidMoveException("Invalid Move");
+        // Makes sure the move given is in the validMoves array
+        if(!validMoves.contains(move)) throw new InvalidMoveException("Invalid Move");
+        // If none of these throw anything then make the move
+        board.addPiece(end, pieceToMove);
+        board.addPiece(start, null);
+        this.changeTurn();
+
     }
 
     /**
@@ -116,6 +139,10 @@ public class ChessGame {
         }
         // If any of the final positions are the kings position, it's in check
         return finalPositions.contains(board.getKingPosition(teamColor));
+    }
+
+    public void changeTurn(){
+        this.currentTeamTurn = this.currentTeamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
