@@ -162,6 +162,9 @@ public class ChessGame {
         return finalPositions.contains(board.getKingPosition(teamColor));
     }
 
+    /**
+     * Changes the team from white to black or black to white
+     */
     public void changeTurn(){
         this.currentTeamTurn = this.currentTeamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }

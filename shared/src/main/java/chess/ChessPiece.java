@@ -72,29 +72,28 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        PieceMovesCalculator calculator;
-        // maybe switch is better
-        if(piece.getPieceType() == PieceType.BISHOP) {
-            calculator = new BishopMovesCalculator();
-        }
-        else if(piece.getPieceType() == PieceType.QUEEN){
-            calculator = new QueenMovesCalculator();
+        PieceMove calculator;
+        if(piece.getPieceType() == PieceType.BISHOP){
+            calculator = new BishopMove();
         }
         else if(piece.getPieceType() == PieceType.KNIGHT){
-            calculator = new KnightMovesCalculator();
-        }
-        else if(piece.getPieceType() == PieceType.PAWN){
-            calculator = new PawnMovesCalculator();
-        }
-        else if(piece.getPieceType() == PieceType.ROOK){
-            calculator = new RookMovesCalculator();
+            calculator = new KnightMove();
         }
         else if(piece.getPieceType() == PieceType.KING){
-            calculator = new KingMovesCalculator();
+            calculator = new KingMove();
+        }
+        else if(piece.getPieceType() == PieceType.ROOK){
+            calculator = new RookMove();
+        }
+        else if(piece.getPieceType() == PieceType.QUEEN){
+            calculator = new QueenMove();
+        }
+        else if(piece.getPieceType() == PieceType.PAWN){
+            calculator = new PawnMove();
         }
         else{
             return List.of();
         }
-        return calculator.pieceMoves(board, myPosition);
+        return calculator.calculateMoves(board,myPosition);
     }
 }

@@ -60,6 +60,10 @@ public class ChessPosition {
         return new ChessPosition(row + other.getRow(), col + other.getColumn());
     }
 
+    public boolean isInBounds(){
+        return (1 <= this.getRow() && this.getRow() <= 8) && (1 <= this.getColumn() && this.getColumn() <= 8);
+    }
+
     @Override
     public String toString(){
         return String.format("[%d,%d]", row, col);
