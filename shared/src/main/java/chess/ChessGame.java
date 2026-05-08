@@ -31,6 +31,20 @@ public class ChessGame {
         currentTeamTurn = team;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && currentTeamTurn == chessGame.currentTeamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, currentTeamTurn);
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
