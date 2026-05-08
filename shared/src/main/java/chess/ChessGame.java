@@ -159,7 +159,22 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // I'm thinking I check every move the team can make and as long
+        // as even one is valid this returns false
+
+        // Make sure the king is actually in check
+        if(!this.isInCheck(teamColor)) return false;
+
+        // This is all the moves the team can make
+        List<ChessMove> teamMoves = new ArrayList<>(board.getTeamMoves(teamColor));
+        List<ChessMove> validMoves = new ArrayList<>();
+
+        for(ChessMove move : teamMoves){
+            if(this.TestMoveValidity(move)){
+                validMoves.add(move);
+            }
+        }
+        return validMoves.isEmpty();
     }
 
     /**
