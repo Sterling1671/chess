@@ -11,7 +11,46 @@ import java.util.*;
 public class ChessGame {
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
+    MoveTracker WhiteMoves = new MoveTracker();
+    MoveTracker BlackMoves = new MoveTracker();
 
+    private static class MoveTracker {
+        private boolean kingMoved = false;
+        private boolean queensideRookMoved = false;
+        private boolean kingsideRookMoved = false;
+
+        public void markKingMoved() { this.kingMoved = true; }
+        public void markQueensideRookMoved() { this.queensideRookMoved = true; }
+        public void markKingsideRookMoved() { this.kingsideRookMoved = true; }
+
+        public boolean canCastleKingside() {
+            return !kingMoved && !kingsideRookMoved;
+        }
+
+        public boolean canCastleQueenside() {
+            return !kingMoved && !queensideRookMoved;
+        }
+
+        public boolean canCastleGeneral(ChessMove move){
+            if(move.getEndPosition().getColumn() == 7){
+                return canCastleKingside();
+            }
+            else{
+                return canCastleQueenside();
+            }
+        }
+    }
+
+    private static final Map<ChessPosition, ChessPosition> ROOK_MAP = Map.of(
+            new ChessPosition(1, 2), new ChessPosition(1, 1),
+            new ChessPosition(1, 7), new ChessPosition(1, 8),
+            new ChessPosition(8, 2), new ChessPosition(8, 1),
+            new ChessPosition(8, 7), new ChessPosition(8, 8),
+            new ChessPosition(8, 8), new ChessPosition(8, 6),
+            new ChessPosition(8, 1), new ChessPosition(8, 3),
+            new ChessPosition(1, 1), new ChessPosition(1, 3),
+            new ChessPosition(1, 8), new ChessPosition(1, 6)
+    );
 
     public ChessGame() {
         board.resetBoard();
@@ -73,11 +112,7 @@ public class ChessGame {
         List<ChessMove> validMoves = new ArrayList<>();
         // Each move is checked for validity and only then moved to validMoves
         for(ChessMove move : uncheckedMoves){
-            // I finally learned about short circuit checks, this uses that
-            if(move.getCastleMove() && this.checkCastleValidity()){
-                validMoves.add(move);
-            }
-            else if(this.TestMoveValidity(move)){
+            if(this.TestMoveValidity(move)){
                 validMoves.add(move);
             }
         }
@@ -97,6 +132,11 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(start);
         ChessPiece takenPiece = board.getPiece(end);
 
+        // CHECK CASTLE
+        // I finally learned about short circuit checks, this uses that
+        if(move.getCastleMove() && this.checkCastleValidity(move)){
+            return true;
+        }
         // Make the move
         board.addPiece(end, piece);
         board.addPiece(start, null);
@@ -111,8 +151,63 @@ public class ChessGame {
         return !invalid;
     }
 
-    public boolean checkCastleValidity(){
+    /**
+     * Checks if a castle move is allowed. Assumes Prior checks
+     * have confirmed this is a king, and it is in the correct position.
+     *
+     * @param move the castle move to be checked
+     * @return True if castling is possible
+     */
+    public boolean checkCastleValidity(ChessMove move){
+        // Makes sure im not just working with a normal move
+        if(!move.getCastleMove()){return false;}
 
+        // First check if the king and rook have moved
+        boolean moveCheck;
+        if(board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
+            moveCheck = !WhiteMoves.canCastleGeneral(move);
+        }
+        else{
+            moveCheck = !BlackMoves.canCastleGeneral(move);
+        }
+        if(moveCheck){return false;}
+
+        // Second checks to make sure the pieces are empty
+        for(
+                ChessPosition count = new ChessPosition(move.getStartPosition());   // Starts at startPosition
+                !count.equals(move.getEndPosition());                               // Ends when it equals EndPosition
+                count = count.getColumn() > move.getEndPosition().getColumn() ?     // Decreases if bigger
+                        count.add(new ChessPosition(0,-1)):
+                        count.add(new ChessPosition(0,1))                  // Increases if smaller
+        ){
+            if(board.getPiece(count) != null){return false;}
+        }
+
+        // Third check the moves against check
+        List<ChessMove> movesToBeChecked = new ArrayList<>();
+
+
+        // This section takes a counter equal to start position then increments it
+        // until it reaches the required end position.
+        ChessPosition counter = new ChessPosition(move.getStartPosition());
+        while(!counter.equals(move.getEndPosition())){
+            ChessPosition start = new ChessPosition(move.getStartPosition());
+            if(counter.getColumn() > move.getEndPosition().getColumn()){
+                counter = counter.add(new ChessPosition(0,-1));
+            }
+            else{
+                counter = counter.add(new ChessPosition(0,1));
+            }
+            ChessPosition end = new ChessPosition(counter);
+            movesToBeChecked.add(new ChessMove(start,end,null));
+        }
+        for(ChessMove move1 : movesToBeChecked){
+            boolean check = this.TestMoveValidity(move1);
+            if(!check){return false;}
+        }
+
+        // Forth makes sure the piece isn't in check already
+        return !this.isInCheck(board.getPiece(move.getStartPosition()).getTeamColor());
     }
 
     /**
@@ -174,6 +269,14 @@ public class ChessGame {
         // Actually add the piece and change turn
         board.addPiece(end, pieceToPlace);
         board.addPiece(start, null);
+        // if castle move the rook as well
+        if(move.getCastleMove()){
+            ChessPosition rookPosition = ROOK_MAP.get(move.getEndPosition());
+            ChessPosition newRookPosition = ROOK_MAP.get(rookPosition);
+            ChessPiece rookToPlace = board.getPiece(rookPosition);
+            board.addPiece(newRookPosition, rookToPlace);
+            board.addPiece(rookPosition, null);
+        }
         this.changeTurn();
 
     }
