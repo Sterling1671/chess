@@ -22,6 +22,21 @@ public class KingMove implements PieceMove{
         for(ChessPosition direction : validDirections){
             validMoves.addAll(calculateSingleDirection(board,myPosition,direction));
         }
+        // Castle check
+        ChessPiece piece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = piece.getTeamColor();
+        int row = color == ChessGame.TeamColor.WHITE ? 1 : 8;
+        // Checks it's still on it's starting tile
+        if(myPosition.equals(new ChessPosition(row, 5))) {
+            List<ChessMove> castleMoves = new ArrayList<>(List.of(
+                    new ChessMove(new ChessPosition(row, 5), new ChessPosition(row, 2), null),
+                    new ChessMove(new ChessPosition(row, 5), new ChessPosition(row, 7), null)
+            ));
+            for (ChessMove castleMove : castleMoves) {
+                castleMove.setCastleMove(true);
+            }
+            validMoves.addAll(castleMoves);
+        }
         return validMoves;
     }
 }

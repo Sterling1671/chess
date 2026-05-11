@@ -12,19 +12,20 @@ public class ChessMove {
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
-
+    private boolean enPassantMove;
+    private boolean castleMove;
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
+        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece && enPassantMove == chessMove.enPassantMove && castleMove == chessMove.castleMove;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startPosition, endPosition, promotionPiece);
+        return Objects.hash(startPosition, endPosition, promotionPiece, castleMove, enPassantMove);
     }
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
@@ -32,6 +33,8 @@ public class ChessMove {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
+        this.castleMove = false;
+        this.enPassantMove = false;
     }
 
     public ChessMove(ChessMove copy,
@@ -39,6 +42,8 @@ public class ChessMove {
         this.startPosition = copy.startPosition;
         this.endPosition = copy.endPosition;
         this.promotionPiece = promotionPiece;
+        this.castleMove = copy.castleMove;
+        this.enPassantMove = copy.enPassantMove;
     }
 
     /**
@@ -54,6 +59,30 @@ public class ChessMove {
     public ChessPosition getEndPosition() {
         return endPosition;
     }
+
+    /**
+     * @return True if move is a castle
+     */
+    public boolean getCastleMove() {
+        return castleMove;
+    }
+
+    /**
+     * @return True if move is enPassant
+     */
+    public boolean getEnPassantMove() {
+        return enPassantMove;
+    }
+
+    /**
+     * @param castleMove True if this move is a castle
+     */
+    public void setCastleMove(boolean castleMove){this.castleMove = castleMove;}
+
+    /**
+     * @param enPassantMove True if this move is enPassant
+     */
+    public void setEnPassantMove(boolean enPassantMove){this.enPassantMove = enPassantMove;}
 
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this

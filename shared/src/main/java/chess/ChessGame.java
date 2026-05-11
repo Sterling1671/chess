@@ -11,6 +11,8 @@ import java.util.*;
 public class ChessGame {
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
+
+
     public ChessGame() {
         board.resetBoard();
     }
@@ -71,7 +73,11 @@ public class ChessGame {
         List<ChessMove> validMoves = new ArrayList<>();
         // Each move is checked for validity and only then moved to validMoves
         for(ChessMove move : uncheckedMoves){
-            if(this.TestMoveValidity(move)){
+            // I finally learned about short circuit checks, this uses that
+            if(move.getCastleMove() && this.checkCastleValidity()){
+                validMoves.add(move);
+            }
+            else if(this.TestMoveValidity(move)){
                 validMoves.add(move);
             }
         }
@@ -105,6 +111,36 @@ public class ChessGame {
         return !invalid;
     }
 
+    public boolean checkCastleValidity(){
+
+    }
+
+    /**
+     * @param move If move is a castle move, sets it's castle flag. NO CHECKS
+     */
+    public void checkIfCastle(ChessMove move){
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        // Make sure it exists again
+        if(piece == null){return;}
+
+        // Gets the color
+        TeamColor color = piece.getTeamColor();
+        // Makes sure it's a king
+        if(piece.getPieceType() == ChessPiece.PieceType.KING){
+            // Get the color and check the moves
+            int row = color == TeamColor.WHITE ? 1 : 8;
+            List<ChessMove> castleMoves = new ArrayList<>(List.of(
+                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,2),null),
+                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7),null)
+            ));
+            for(ChessMove castleMove : castleMoves){
+                if(move.equals(castleMove)){
+                    move.setCastleMove(true);
+                }
+            }
+        }
+    }
+
     /**
      * Makes a move in the chess game
      *
@@ -118,6 +154,10 @@ public class ChessGame {
 
         // Checks if piece exists
         if(pieceToMove == null) throw new InvalidMoveException("Invalid Move");
+        // First checks if the move is a castle(set castle flag)
+        checkIfCastle(move);
+
+
         // Gets all valid moves that start position could make
         List<ChessMove> validMoves = new ArrayList<>(this.validMoves(start));
         // Checks if piece is the right turn

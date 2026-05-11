@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class ChessBoard {
     ChessPiece[][] squares = new ChessPiece[8][8];
+    ChessPosition enPassantTile = null;
     public ChessBoard() {
         
     }
@@ -137,11 +138,11 @@ public class ChessBoard {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return Objects.deepEquals(squares, that.squares);
+        return Objects.deepEquals(squares, that.squares) && Objects.equals(enPassantTile, that.enPassantTile);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(squares);
+        return Objects.hash(Arrays.deepHashCode(squares), enPassantTile);
     }
 }
