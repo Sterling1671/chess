@@ -11,13 +11,20 @@ import java.util.*;
 public class ChessGame {
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
-    MoveTracker WhiteMoves = new MoveTracker();
-    MoveTracker BlackMoves = new MoveTracker();
+    MoveTracker WhiteMoves = new MoveTracker(1);
+    MoveTracker BlackMoves = new MoveTracker(8);
 
-    private static class MoveTracker {
+    private class MoveTracker {
         private boolean kingMoved = false;
         private boolean queensideRookMoved = false;
         private boolean kingsideRookMoved = false;
+        private final int homeRow;
+        private final TeamColor color;
+
+        public MoveTracker(int homeRow){
+            this.homeRow = homeRow;
+            this.color = homeRow == 1 ? TeamColor.WHITE : TeamColor.BLACK;
+        }
 
         public void markKingMoved() { this.kingMoved = true; }
         public void markQueensideRookMoved() { this.queensideRookMoved = true; }
@@ -31,24 +38,38 @@ public class ChessGame {
             return !kingMoved && !queensideRookMoved;
         }
 
-        public boolean canCastleGeneral(ChessMove move){
+        public boolean canNotCastleGeneral(ChessMove move){
             if(move.getEndPosition().getColumn() == 7){
-                return canCastleKingside();
+                return !canCastleKingside();
             }
             else{
-                return canCastleQueenside();
+                return !canCastleQueenside();
             }
+        }
+        public void setMoves(ChessMove move){
+            if(Objects.equals(move.getStartPosition(), new ChessPosition(this.homeRow, 5))){markKingMoved();}
+            if(Objects.equals(move.getStartPosition(), new ChessPosition(this.homeRow, 8))){markKingsideRookMoved();}
+            if(Objects.equals(move.getStartPosition(), new ChessPosition(this.homeRow, 1))){markQueensideRookMoved();}
+            // This menace should check the piece at queenside rook space and make sure its actiall the rook
+            if(!Objects.equals(board.getPiece(new ChessPosition(this.homeRow,1)),new ChessPiece(color, ChessPiece.PieceType.ROOK))){
+                markQueensideRookMoved();
+            }
+            if(!Objects.equals(board.getPiece(new ChessPosition(this.homeRow,8)),new ChessPiece(color, ChessPiece.PieceType.ROOK))){
+                markKingsideRookMoved();
+            }
+
+
         }
     }
 
     private static final Map<ChessPosition, ChessPosition> ROOK_MAP = Map.of(
-            new ChessPosition(1, 2), new ChessPosition(1, 1),
+            new ChessPosition(1, 3), new ChessPosition(1, 1),
             new ChessPosition(1, 7), new ChessPosition(1, 8),
-            new ChessPosition(8, 2), new ChessPosition(8, 1),
+            new ChessPosition(8, 3), new ChessPosition(8, 1),
             new ChessPosition(8, 7), new ChessPosition(8, 8),
             new ChessPosition(8, 8), new ChessPosition(8, 6),
-            new ChessPosition(8, 1), new ChessPosition(8, 3),
-            new ChessPosition(1, 1), new ChessPosition(1, 3),
+            new ChessPosition(8, 1), new ChessPosition(8, 4),
+            new ChessPosition(1, 1), new ChessPosition(1, 4),
             new ChessPosition(1, 8), new ChessPosition(1, 6)
     );
 
@@ -134,8 +155,8 @@ public class ChessGame {
 
         // CHECK CASTLE
         // I finally learned about short circuit checks, this uses that
-        if(move.getCastleMove() && this.checkCastleValidity(move)){
-            return true;
+        if(move.getCastleMove()) {
+            return this.checkCastleValidity(move);
         }
         // Make the move
         board.addPiece(end, piece);
@@ -165,22 +186,24 @@ public class ChessGame {
         // First check if the king and rook have moved
         boolean moveCheck;
         if(board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
-            moveCheck = !WhiteMoves.canCastleGeneral(move);
+            moveCheck = WhiteMoves.canNotCastleGeneral(move);
         }
         else{
-            moveCheck = !BlackMoves.canCastleGeneral(move);
+            moveCheck = BlackMoves.canNotCastleGeneral(move);
         }
         if(moveCheck){return false;}
 
         // Second checks to make sure the pieces are empty
-        for(
-                ChessPosition count = new ChessPosition(move.getStartPosition());   // Starts at startPosition
-                !count.equals(move.getEndPosition());                               // Ends when it equals EndPosition
-                count = count.getColumn() > move.getEndPosition().getColumn() ?     // Decreases if bigger
-                        count.add(new ChessPosition(0,-1)):
-                        count.add(new ChessPosition(0,1))                  // Increases if smaller
-        ){
-            if(board.getPiece(count) != null){return false;}
+        int colDiff = move.getEndPosition().getColumn() - move.getStartPosition().getColumn();
+        int step = (colDiff > 0) ? 1 : -1;
+        ChessPosition current = move.getStartPosition().add(new ChessPosition(0, step));
+
+        // This monstrosity checks current until the square on the same row as it at 1 or 8
+        while (!current.equals(new ChessPosition(current.getRow(),step == 1 ? 8:1))) {
+            if (board.getPiece(current) != null) {
+                return false;
+            }
+            current = current.add(new ChessPosition(0, step));
         }
 
         // Third check the moves against check
@@ -191,15 +214,9 @@ public class ChessGame {
         // until it reaches the required end position.
         ChessPosition counter = new ChessPosition(move.getStartPosition());
         while(!counter.equals(move.getEndPosition())){
-            ChessPosition start = new ChessPosition(move.getStartPosition());
-            if(counter.getColumn() > move.getEndPosition().getColumn()){
-                counter = counter.add(new ChessPosition(0,-1));
-            }
-            else{
-                counter = counter.add(new ChessPosition(0,1));
-            }
+            counter = counter.add(new ChessPosition(0,step));
             ChessPosition end = new ChessPosition(counter);
-            movesToBeChecked.add(new ChessMove(start,end,null));
+            movesToBeChecked.add(new ChessMove(move.getStartPosition(),end,null));
         }
         for(ChessMove move1 : movesToBeChecked){
             boolean check = this.TestMoveValidity(move1);
@@ -225,7 +242,7 @@ public class ChessGame {
             // Get the color and check the moves
             int row = color == TeamColor.WHITE ? 1 : 8;
             List<ChessMove> castleMoves = new ArrayList<>(List.of(
-                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,2),null),
+                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3),null),
                     new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7),null)
             ));
             for(ChessMove castleMove : castleMoves){
@@ -266,6 +283,14 @@ public class ChessGame {
         ChessPiece pieceToPlace = pieceToPlaceType == null ?
                 new ChessPiece(pieceToMove) :
                 new ChessPiece(pieceToMove.getTeamColor(),pieceToPlaceType);
+
+        // If rooks or kings are moved change flags
+        if(currentTeamTurn == TeamColor.WHITE){
+            WhiteMoves.setMoves(move);
+        }
+        else{
+            BlackMoves.setMoves(move);
+        }
         // Actually add the piece and change turn
         board.addPiece(end, pieceToPlace);
         board.addPiece(start, null);

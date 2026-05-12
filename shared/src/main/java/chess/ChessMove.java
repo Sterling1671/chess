@@ -20,12 +20,12 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece && enPassantMove == chessMove.enPassantMove && castleMove == chessMove.castleMove;
+        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startPosition, endPosition, promotionPiece, castleMove, enPassantMove);
+        return Objects.hash(startPosition, endPosition, promotionPiece);
     }
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
