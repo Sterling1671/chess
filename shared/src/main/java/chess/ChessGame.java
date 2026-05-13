@@ -9,11 +9,70 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessGame {
+
+    /*****************************************************************
+     * CONSTRUCTOR, GET/SET METHODS AND INTERNAL VARIABLES
+     ****************************************************************/
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
     MoveTracker WhiteMoves = new MoveTracker(1);
     MoveTracker BlackMoves = new MoveTracker(8);
+    private static final Map<ChessPosition, ChessPosition> ROOK_MAP = Map.of(
+            new ChessPosition(1, 3), new ChessPosition(1, 1),
+            new ChessPosition(1, 7), new ChessPosition(1, 8),
+            new ChessPosition(8, 3), new ChessPosition(8, 1),
+            new ChessPosition(8, 7), new ChessPosition(8, 8),
+            new ChessPosition(8, 8), new ChessPosition(8, 6),
+            new ChessPosition(8, 1), new ChessPosition(8, 4),
+            new ChessPosition(1, 1), new ChessPosition(1, 4),
+            new ChessPosition(1, 8), new ChessPosition(1, 6)
+    );
 
+    /**
+     * Enum identifying the 2 possible teams in a chess game
+     */
+    public enum TeamColor {
+        WHITE,
+        BLACK
+    }
+
+    public ChessGame() {
+        board.resetBoard();
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && currentTeamTurn == chessGame.currentTeamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, currentTeamTurn);
+    }
+    /**
+     * Sets this game's chessboard to a given board
+     *
+     * @param board the new board to use
+     */
+    public void setBoard(ChessBoard board) {
+        this.board = board;
+    }
+
+    /**
+     * Gets the current chessboard
+     *
+     * @return the chessboard
+     */
+    public ChessBoard getBoard() {
+        return this.board;
+    }
+
+    // ****************************************************************
+    // * MOVE TRACKER CLASS(needs Javadoc)
+    // ****************************************************************
     private class MoveTracker {
         private boolean kingMoved = false;
         private boolean queensideRookMoved = false;
@@ -50,7 +109,7 @@ public class ChessGame {
             if(Objects.equals(move.getStartPosition(), new ChessPosition(this.homeRow, 5))){markKingMoved();}
             if(Objects.equals(move.getStartPosition(), new ChessPosition(this.homeRow, 8))){markKingsideRookMoved();}
             if(Objects.equals(move.getStartPosition(), new ChessPosition(this.homeRow, 1))){markQueensideRookMoved();}
-            // This menace should check the piece at queenside rook space and make sure its actiall the rook
+            // This menace should check the piece at queenside rook space and make sure it's actually the rook
             if(!Objects.equals(board.getPiece(new ChessPosition(this.homeRow,1)),new ChessPiece(color, ChessPiece.PieceType.ROOK))){
                 markQueensideRookMoved();
             }
@@ -62,20 +121,10 @@ public class ChessGame {
         }
     }
 
-    private static final Map<ChessPosition, ChessPosition> ROOK_MAP = Map.of(
-            new ChessPosition(1, 3), new ChessPosition(1, 1),
-            new ChessPosition(1, 7), new ChessPosition(1, 8),
-            new ChessPosition(8, 3), new ChessPosition(8, 1),
-            new ChessPosition(8, 7), new ChessPosition(8, 8),
-            new ChessPosition(8, 8), new ChessPosition(8, 6),
-            new ChessPosition(8, 1), new ChessPosition(8, 4),
-            new ChessPosition(1, 1), new ChessPosition(1, 4),
-            new ChessPosition(1, 8), new ChessPosition(1, 6)
-    );
 
-    public ChessGame() {
-        board.resetBoard();
-    }
+    // ****************************************************************
+    // * UTIL FUNCTIONS
+    // ****************************************************************
 
     /**
      * @return Which team's turn it is
@@ -93,28 +142,54 @@ public class ChessGame {
         currentTeamTurn = team;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(board, chessGame.board) && currentTeamTurn == chessGame.currentTeamTurn;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(board, currentTeamTurn);
+    /**
+     * Changes the team from white to black or black to white
+     */
+    public void changeTurn(){
+        this.currentTeamTurn = this.currentTeamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
-     * Enum identifying the 2 possible teams in a chess game
+     * @param move If move is a castle move, sets it's castle flag. NO CHECKS
      */
-    public enum TeamColor {
-        WHITE,
-        BLACK
+    public void checkIfCastle(ChessMove move){
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        // Make sure it exists again
+        if(piece == null){return;}
+
+        // Gets the color
+        TeamColor color = piece.getTeamColor();
+        // Makes sure it's a king
+        if(piece.getPieceType() == ChessPiece.PieceType.KING){
+            // Get the color and check the moves
+            int row = color == TeamColor.WHITE ? 1 : 8;
+            List<ChessMove> castleMoves = new ArrayList<>(List.of(
+                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3),null),
+                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7),null)
+            ));
+            for(ChessMove castleMove : castleMoves){
+                if(move.equals(castleMove)){
+                    move.setCastleMove(true);
+                }
+            }
+        }
+    }
+    /**
+     * @param move If move is an enPassant move, set its flag
+     */
+    public void checkIfEnPassant(ChessMove move){
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if(piece.getPieceType() == ChessPiece.PieceType.PAWN){
+            if(Objects.equals(move.getEndPosition(), board.enPassantTile)){
+                move.setEnPassantMove(true);
+            }
+        }
     }
 
+
+    // ****************************************************************
+    // * MOVE VALIDATION
+    // ****************************************************************
     /**
      * Gets all valid moves for a piece at the given location
      *
@@ -180,7 +255,7 @@ public class ChessGame {
      * @return True if castling is possible
      */
     public boolean checkCastleValidity(ChessMove move){
-        // Makes sure im not just working with a normal move
+        // Makes sure I'm not just working with a normal move
         if(!move.getCastleMove()){return false;}
 
         // First check if the king and rook have moved
@@ -227,31 +302,9 @@ public class ChessGame {
         return !this.isInCheck(board.getPiece(move.getStartPosition()).getTeamColor());
     }
 
-    /**
-     * @param move If move is a castle move, sets it's castle flag. NO CHECKS
-     */
-    public void checkIfCastle(ChessMove move){
-        ChessPiece piece = board.getPiece(move.getStartPosition());
-        // Make sure it exists again
-        if(piece == null){return;}
-
-        // Gets the color
-        TeamColor color = piece.getTeamColor();
-        // Makes sure it's a king
-        if(piece.getPieceType() == ChessPiece.PieceType.KING){
-            // Get the color and check the moves
-            int row = color == TeamColor.WHITE ? 1 : 8;
-            List<ChessMove> castleMoves = new ArrayList<>(List.of(
-                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3),null),
-                    new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7),null)
-            ));
-            for(ChessMove castleMove : castleMoves){
-                if(move.equals(castleMove)){
-                    move.setCastleMove(true);
-                }
-            }
-        }
-    }
+    // ****************************************************************
+    // * MOVE PIECES
+    // ****************************************************************
 
     /**
      * Makes a move in the chess game
@@ -266,8 +319,9 @@ public class ChessGame {
 
         // Checks if piece exists
         if(pieceToMove == null) throw new InvalidMoveException("Invalid Move");
-        // First checks if the move is a castle(set castle flag)
+        // First checks if the move is a castle(set castle flag) or En Passant
         checkIfCastle(move);
+        checkIfEnPassant(move);
 
 
         // Gets all valid moves that start position could make
@@ -302,9 +356,35 @@ public class ChessGame {
             board.addPiece(newRookPosition, rookToPlace);
             board.addPiece(rookPosition, null);
         }
+        // if en passant remove different piece
+        if(move.getEnPassantMove()){
+            int rowDir = this.currentTeamTurn == TeamColor.WHITE ? -1 : 1;
+            ChessPosition pieceToRemove = move.getEndPosition().add(new ChessPosition(rowDir, 0));
+            board.addPiece(pieceToRemove, null);
+        }
+        // if double move occurred set en passant position
+        if(pieceToMove.getPieceType() == ChessPiece.PieceType.PAWN){
+            int startRow = this.currentTeamTurn == TeamColor.WHITE ? 2 : 7;
+            int endRow = this.currentTeamTurn == TeamColor.WHITE ? 4 : 5;
+            int enPassantRow = this.currentTeamTurn == TeamColor.WHITE ? 3 : 6;
+            if(move.getStartPosition().getRow() == startRow && move.getEndPosition().getRow() == endRow){
+                board.enPassantTile = new ChessPosition(enPassantRow, move.getStartPosition().getColumn());
+            }
+            else{
+                board.enPassantTile = null;
+            }
+        }
+        else{
+            board.enPassantTile = null;
+        }
+
         this.changeTurn();
 
     }
+
+    // ****************************************************************
+    // * CHECK FUNCTIONS
+    // ****************************************************************
 
     /**
      * Determines if the given team is in check
@@ -328,13 +408,6 @@ public class ChessGame {
         }
         // If any of the final positions are the kings position, it's in check
         return finalPositions.contains(board.getKingPosition(teamColor));
-    }
-
-    /**
-     * Changes the team from white to black or black to white
-     */
-    public void changeTurn(){
-        this.currentTeamTurn = this.currentTeamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
@@ -383,23 +456,5 @@ public class ChessGame {
             }
         }
         return validMoves.isEmpty();
-    }
-
-    /**
-     * Sets this game's chessboard to a given board
-     *
-     * @param board the new board to use
-     */
-    public void setBoard(ChessBoard board) {
-        this.board = board;
-    }
-
-    /**
-     * Gets the current chessboard
-     *
-     * @return the chessboard
-     */
-    public ChessBoard getBoard() {
-        return this.board;
     }
 }

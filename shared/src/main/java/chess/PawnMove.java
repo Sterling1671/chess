@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class PawnMove implements PieceMove{
     @Override
@@ -10,7 +11,7 @@ public class PawnMove implements PieceMove{
         List<ChessMove> validMoves = new ArrayList<>();
         ChessPiece originalPiece = board.getPiece(myPosition);
         ChessGame.TeamColor myColor = originalPiece.getTeamColor();
-
+        // For white team
         if(myColor == ChessGame.TeamColor.WHITE){
             ChessPosition positionToCheck = myPosition.add(new ChessPosition(1,0));
             if(positionToCheck.isInBounds()){
@@ -40,6 +41,10 @@ public class PawnMove implements PieceMove{
                             validMoves.addAll(checkPromotion(myPosition, positionToCheck, myColor));
                         }
                     }
+                    else if(Objects.equals(positionToCheck,board.enPassantTile)){
+                        ChessMove enPassantMove = new ChessMove(myPosition, positionToCheck, null);
+                        enPassantMove.setEnPassantMove(true);
+                        validMoves.add(enPassantMove);                    }
                 }
             }
         }
@@ -71,6 +76,11 @@ public class PawnMove implements PieceMove{
                         if (piece.getTeamColor() != myColor) {
                             validMoves.addAll(checkPromotion(myPosition, positionToCheck, myColor));
                         }
+                    }
+                    else if(Objects.equals(positionToCheck,board.enPassantTile)){
+                        ChessMove enPassantMove = new ChessMove(myPosition, positionToCheck, null);
+                        enPassantMove.setEnPassantMove(true);
+                        validMoves.add(enPassantMove);
                     }
                 }
             }
