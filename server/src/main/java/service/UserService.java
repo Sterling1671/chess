@@ -45,6 +45,13 @@ public class UserService {
 
         return new RegisterResult(username, authToken);
     }
+
+    /**
+     *
+     * @param loginRequest A request object passed from the handler that has fields with
+     *                     username and password.
+     * @return a LoginResult object containing the username and authToken saved to the DB
+     */
     public LoginResult login(LoginRequest loginRequest){
         return null;
     }
