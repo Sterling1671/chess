@@ -112,4 +112,13 @@ public class UserServiceTests {
 
         Assertions.assertNull(authDAO.getAuth(authToken));
     }
+
+    @Test
+    @DisplayName("Attempt logout on logged out user")
+    public void logoutLoggedOutUser(){
+        String authToken = "FakeAuthToken";
+        LogoutRequest request = new LogoutRequest(authToken);
+
+        Assertions.assertThrows(UnauthorizedException.class, () -> service.logout(request));
+    }
 }

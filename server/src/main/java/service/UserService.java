@@ -13,6 +13,9 @@ import java.util.Objects;
 
 public class UserService {
 
+    private static final UserDAO myUserDAO = new MemoryUserDAO();
+    private static final AuthDAO myAuthDAO = new MemoryAuthDAO();
+
     /**
      * Registers a user in the database with the provided username, password and email.
      * Throws an exception if the username is already taken
@@ -24,9 +27,6 @@ public class UserService {
     public RegisterResult register(RegisterRequest registerRequest) throws AlreadyTakenException {
         // Get the username from the request
         String username = registerRequest.username();
-
-        // Get a DAO instance
-        UserDAO myUserDAO = new MemoryUserDAO();
 
         // Check if there's already a user by that name
         UserData checkUsername = myUserDAO.getUser(username);
@@ -41,7 +41,6 @@ public class UserService {
         // Then fill out the auth data
         String authToken = AuthService.generateToken();
         AuthData authToSave = new AuthData(authToken, username);
-        AuthDAO myAuthDAO = new MemoryAuthDAO();
         myAuthDAO.createAuth(authToSave);
 
         return new RegisterResult(authToSave);
@@ -57,10 +56,6 @@ public class UserService {
         // Get the username and password from the request
         String username = loginRequest.username();
         String password = loginRequest.password();
-
-        // Get a userDAO and authDAO instance
-        UserDAO myUserDAO = new MemoryUserDAO();
-        AuthDAO myAuthDAO = new MemoryAuthDAO();
 
         // Check if there's already a UserData by that name
         UserData checkData = myUserDAO.getUser(username);
@@ -95,7 +90,6 @@ public class UserService {
         String authToken = logoutRequest.authToken();
 
         // Check if it exists
-        AuthDAO myAuthDAO = new MemoryAuthDAO();
         AuthData checkAuth = myAuthDAO.getAuth(authToken);
         if(checkAuth == null){
             throw new UnauthorizedException("unauthorized");
@@ -105,5 +99,7 @@ public class UserService {
         myAuthDAO.deleteAuth(checkAuth);
     }
 
-    public void clear(){}
+    public void clear(){
+        myUserDAO.clear();
+    }
 }
