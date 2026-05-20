@@ -1,4 +1,8 @@
 package model.results;
 
-public record ListGamesResult() {
+import model.GameData;
+
+import java.util.Collection;
+
+public record ListGamesResult(Collection<GameData> allGames) {
 }

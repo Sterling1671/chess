@@ -51,8 +51,9 @@ public class UserService {
      * @param loginRequest A request object passed from the handler that has fields with
      *                     username and password.
      * @return a LoginResult object containing the username and authToken saved to the DB
+     * @throws UnauthorizedException if the user doesn't have correct credentials
      */
-    public LoginResult login(LoginRequest loginRequest){
+    public LoginResult login(LoginRequest loginRequest) throws UnauthorizedException{
         // Get the username and password from the request
         String username = loginRequest.username();
         String password = loginRequest.password();
@@ -84,8 +85,9 @@ public class UserService {
     /**
      * Logs a user out of the database, removing their auth token but keeping username
      * @param logoutRequest a LogoutRequest object containing authToken to be removed from DB
+     * @throws UnauthorizedException if the user doesn't have correct credentials
      */
-    public void logout(LogoutRequest logoutRequest){
+    public void logout(LogoutRequest logoutRequest) throws UnauthorizedException{
         // Get the auth token from the request
         String authToken = logoutRequest.authToken();
 
@@ -99,6 +101,9 @@ public class UserService {
         myAuthDAO.deleteAuth(checkAuth);
     }
 
+    /**
+     * Clears the UserDAO associated with UserService
+     */
     public void clear(){
         myUserDAO.clear();
     }
