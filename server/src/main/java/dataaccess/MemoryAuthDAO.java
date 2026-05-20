@@ -30,6 +30,16 @@ public class MemoryAuthDAO implements AuthDAO{
     }
 
     @Override
+    public AuthData getAuthByUser(String username){
+        for(AuthData data : allAuth){
+            if(Objects.equals(username, data.username())){
+                return data;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void deleteAuth(AuthData authData) {
         allAuth.remove(authData);
     }

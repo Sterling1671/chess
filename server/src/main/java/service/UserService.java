@@ -10,6 +10,8 @@ import model.requests.RegisterRequest;
 import model.results.LoginResult;
 import model.results.RegisterResult;
 
+import java.util.Objects;
+
 public class UserService {
 
     /**
@@ -43,17 +45,46 @@ public class UserService {
         AuthDAO myAuthDAO = new MemoryAuthDAO();
         myAuthDAO.createAuth(authToSave);
 
-        return new RegisterResult(username, authToken);
+        return new RegisterResult(authToSave);
     }
 
     /**
-     *
+     * Logs an existing user in to the database, returning an authToken for them to use
      * @param loginRequest A request object passed from the handler that has fields with
      *                     username and password.
      * @return a LoginResult object containing the username and authToken saved to the DB
      */
     public LoginResult login(LoginRequest loginRequest){
-        return null;
+        // Get the username and password from the request
+        String username = loginRequest.username();
+        String password = loginRequest.password();
+
+        // Get a userDAO and authDAO instance
+        UserDAO myUserDAO = new MemoryUserDAO();
+        AuthDAO myAuthDAO = new MemoryAuthDAO();
+
+        // Check if there's already a UserData by that name
+        UserData checkData = myUserDAO.getUser(username);
+
+        // If there isn't throw an exception
+        if(checkData == null){throw new UnauthorizedException("unauthorized");}
+
+        // Now check the password
+        if(!Objects.equals(checkData.password(), password)){
+            throw new UnauthorizedException("unauthorized");
+        }
+
+        // Now check if there's a previous Auth and delete it
+        AuthData oldAuth = myAuthDAO.getAuthByUser(username);
+        if(oldAuth != null){
+            myAuthDAO.deleteAuth(oldAuth);
+        }
+
+        // Generate a new authToken and make a new AuthData object
+        String authToken = AuthService.generateToken();
+        AuthData authToSave = new AuthData(authToken, username);
+        myAuthDAO.createAuth(authToSave);
+        return new LoginResult(authToSave);
     }
     public void logout(LogoutRequest logoutRequest){}
     public void clear(ClearRequest clearRequest){}
