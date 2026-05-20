@@ -1,6 +1,5 @@
 package service;
 
-import model.requests.ClearRequest;
 import model.requests.CreateGameRequest;
 import model.requests.JoinGameRequest;
 import model.requests.ListGamesRequest;
@@ -15,5 +14,5 @@ public class GameService {
         return null;
     }
     public void joinGame(JoinGameRequest joinGameRequest){}
-    public void clear(ClearRequest clearRequest){}
+    public void clear(){}
 }

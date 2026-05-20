@@ -3,7 +3,6 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
-import model.requests.ClearRequest;
 import model.requests.LoginRequest;
 import model.requests.LogoutRequest;
 import model.requests.RegisterRequest;
@@ -86,6 +85,25 @@ public class UserService {
         myAuthDAO.createAuth(authToSave);
         return new LoginResult(authToSave);
     }
-    public void logout(LogoutRequest logoutRequest){}
-    public void clear(ClearRequest clearRequest){}
+
+    /**
+     * Logs a user out of the database, removing their auth token but keeping username
+     * @param logoutRequest a LogoutRequest object containing authToken to be removed from DB
+     */
+    public void logout(LogoutRequest logoutRequest){
+        // Get the auth token from the request
+        String authToken = logoutRequest.authToken();
+
+        // Check if it exists
+        AuthDAO myAuthDAO = new MemoryAuthDAO();
+        AuthData checkAuth = myAuthDAO.getAuth(authToken);
+        if(checkAuth == null){
+            throw new UnauthorizedException("unauthorized");
+        }
+
+        // If it does exist, remove it
+        myAuthDAO.deleteAuth(checkAuth);
+    }
+
+    public void clear(){}
 }
