@@ -1,8 +1,6 @@
 package service;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.AuthDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import model.requests.ClearRequest;
@@ -27,7 +25,7 @@ public class UserService {
         String username = registerRequest.username();
 
         // Get a DAO instance
-        UserDAO myUserDAO; // Initialize
+        UserDAO myUserDAO = new MemoryUserDAO();
 
         // Check if there's already a user by that name
         UserData checkUsername = myUserDAO.getUser(username);
@@ -42,7 +40,7 @@ public class UserService {
         // Then fill out the auth data
         String authToken = AuthService.generateToken();
         AuthData authToSave = new AuthData(authToken, username);
-        AuthDAO myAuthDAO; // INITIALIZE
+        AuthDAO myAuthDAO = new MemoryAuthDAO();
         myAuthDAO.createAuth(authToSave);
 
         return new RegisterResult(username, authToken);
