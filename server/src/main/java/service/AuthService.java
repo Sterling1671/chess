@@ -7,7 +7,7 @@ import dataaccess.UnauthorizedException;
 import java.util.UUID;
 
 public class AuthService {
-    private static final AuthDAO myAuthDAO = new MemoryAuthDAO();
+    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
 
     /**
      * Generates a new unique authToken
@@ -23,11 +23,11 @@ public class AuthService {
      * @throws UnauthorizedException if the token isn't authorized
      */
     public static void checkIfAuthorized(String authToken) throws UnauthorizedException{
-        if(myAuthDAO.getAuth(authToken) == null){
+        if(AUTH_DAO.getAuth(authToken) == null){
             throw new UnauthorizedException("unauthorized");
         }
     }
     public void clear(){
-        myAuthDAO.clear();
+        AUTH_DAO.clear();
     }
 }
