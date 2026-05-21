@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
+import model.AuthData;
 import model.GameData;
 import model.requests.CreateGameRequest;
 import model.requests.JoinGameRequest;
@@ -10,13 +11,13 @@ import model.results.CreateGameResult;
 import model.results.ListGamesResult;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class GameService {
 
-    private static final UserDAO myUserDAO = new MemoryUserDAO();
     private static final GameDAO myGameDAO = new MemoryGameDAO();
     private static final AuthDAO myAuthDAO = new MemoryAuthDAO();
     // The internet says I need to be thread safe for servers I guess
@@ -50,7 +51,7 @@ public class GameService {
     }
 
 
-    public CreateGameResult createGame(CreateGameRequest createGameRequest){
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws UnauthorizedException{
         String authToken = createGameRequest.authToken();
         String gameName = createGameRequest.gameName();
 
@@ -72,9 +73,68 @@ public class GameService {
 
         return new CreateGameResult(gameID);
     }
-    public void joinGame(JoinGameRequest joinGameRequest){}
+
+    /**
+     * Joins an already created game of chess
+     * @param joinGameRequest a request object from the handler that includes an authToken,
+     *                        a TeamColor, and a gameID
+     * @throws UnauthorizedException If the given authorization token doesn't have permission,
+     *                               or the gameID doesn't exist
+     * @throws AlreadyTakenException If the game already has a player of the selected color
+     */
+    public void joinGame(JoinGameRequest joinGameRequest) throws UnauthorizedException, AlreadyTakenException{
+        String authToken = joinGameRequest.authToken();
+        ChessGame.TeamColor playerColor = joinGameRequest.playerColor();
+        int gameId = joinGameRequest.gameID();
+
+        // Check if user is authorized
+        AuthService.checkIfAuthorized(authToken);
+
+        // If authorized, get auth data
+        AuthData authData = myAuthDAO.getAuth(authToken);
+        String username = authData.username();
+
+        // Get game id if exists
+        GameData gameData = myGameDAO.getGame(gameId);
+        if(gameData == null){
+            throw new UnauthorizedException("unauthorized");
+        }
+
+        // Check to see if there is already player at color
+        GameData dataToSave;
+        if(playerColor == ChessGame.TeamColor.WHITE){
+            if(gameData.whiteUsername() == null){
+                dataToSave = new GameData(gameData, username, gameData.blackUsername());
+            }
+            else if(Objects.equals(gameData.whiteUsername(), username)){
+                return;
+            }
+            else{
+                throw new AlreadyTakenException("already taken");
+            }
+        }
+        else{
+            if(gameData.blackUsername() == null){
+                dataToSave = new GameData(gameData, gameData.whiteUsername(), username);
+            }
+            else if(Objects.equals(gameData.blackUsername(), username)){
+                return;
+            }
+            else{
+                throw new AlreadyTakenException("already taken");
+            }
+        }
+
+        // Remove the old game from file and add the new one
+        myGameDAO.updateGame(dataToSave);
+    }
+
+    /**
+     * Clears the GameDAO associated with GameService
+     */
     public void clear(){
         gameIDCount.set(1);
         recycledID.clear();
+        myGameDAO.clear();
     }
 }
