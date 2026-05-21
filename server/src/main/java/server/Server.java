@@ -1,13 +1,10 @@
 package server;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
 import dataaccess.UnauthorizedException;
 import io.javalin.*;
-import io.javalin.http.Context;
-import model.requests.RegisterRequest;
 import server.exceptions.*;
 import server.handlers.*;
 
@@ -37,9 +34,9 @@ public class Server {
         javalinServer.post("/user", new RegistrationHandler());
         javalinServer.post("/session", new LoginHandler());
         javalinServer.delete("/session", new LogoutHandler());
-        javalinServer.get("/game", new ListaGamesHandler());
+        javalinServer.get("/game", new ListGamesHandler());
         javalinServer.post("/game", new CreateGameHandler());
-        javalinServer.put("/game", new JoinGameHangler());
+        javalinServer.put("/game", new JoinGameHandler());
         javalinServer.delete("/db",new ClearGameHandler());
     }
     private void createExceptions(Javalin javalinServer){

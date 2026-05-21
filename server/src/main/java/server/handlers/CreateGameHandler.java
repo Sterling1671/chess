@@ -11,12 +11,14 @@ import service.GameService;
 
 public class CreateGameHandler implements Handler {
     @Override
-    public void handle(@NotNull Context context) throws Exception {
+    public void handle(@NotNull Context context) throws BadRequestException {
         Gson serializer = new Gson();
         String authToken = context.header("Authorization");
         PartialBody body = serializer.fromJson(context.body(), PartialBody.class);
-        String gameName = body.gameName;;
-
+        String gameName = body.gameName;
+        if(gameName == null || authToken == null){
+            throw new BadRequestException("bad request");
+        }
 
         CreateGameRequest request = new CreateGameRequest(authToken, gameName);
         GameService service = new GameService();

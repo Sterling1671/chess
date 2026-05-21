@@ -22,7 +22,7 @@ public class MemoryGameDAO implements GameDAO{
     @Override
     public GameData getGame(int gameID) {
         for(GameData data : games){
-            if(gameID == data.gameId()){
+            if(gameID == data.gameID()){
                 return data;
             }
         }
@@ -36,7 +36,7 @@ public class MemoryGameDAO implements GameDAO{
 
     @Override
     public void updateGame(GameData gameData) {
-        GameData prev = getGame(gameData.gameId());
+        GameData prev = getGame(gameData.gameID());
         games.remove(prev);
         games.add(gameData);
     }

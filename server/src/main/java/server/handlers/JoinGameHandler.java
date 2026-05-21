@@ -12,7 +12,7 @@ import service.GameService;
 import java.util.Map;
 import java.util.Objects;
 
-public class JoinGameHangler implements Handler {
+public class JoinGameHandler implements Handler {
     @Override
     public void handle(@NotNull Context context) throws Exception {
         Gson serializer = new Gson();
@@ -25,9 +25,13 @@ public class JoinGameHangler implements Handler {
         if(Objects.equals(body.playerColor, "WHITE")){
             color = ChessGame.TeamColor.WHITE;
         }
-        else{
+        else if(Objects.equals(body.playerColor, "BLACK")){
             color = ChessGame.TeamColor.BLACK;
         }
+        else{
+            throw new BadRequestException("bad request");
+        }
+
 
         JoinGameRequest request = new JoinGameRequest(authToken, color, body.gameID);
         GameService service = new GameService();

@@ -101,7 +101,7 @@ class GameServiceTests {
                 gameHasBlackPlayer,
                 gameHasWhitePlayer,
                 gameHasTwoPlayers));
-        Assertions.assertEquals(correctList, result.allGames(),
+        Assertions.assertEquals(correctList, result.games(),
                 "ListGames didn't show all the games");
     }
 
@@ -133,7 +133,7 @@ class GameServiceTests {
         JoinGameRequest request = new JoinGameRequest(
                 unauthorizedPlayer.authToken(),
                 ChessGame.TeamColor.WHITE,
-                gameHasNoPlayers.gameId());
+                gameHasNoPlayers.gameID());
         Assertions.assertThrows(UnauthorizedException.class, () -> service.joinGame(request));
     }
 
@@ -153,9 +153,9 @@ class GameServiceTests {
         JoinGameRequest request = new JoinGameRequest(
                 authorizedPlayer.authToken(),
                 ChessGame.TeamColor.WHITE,
-                gameHasNoPlayers.gameId());
+                gameHasNoPlayers.gameID());
         service.joinGame(request);
-        Assertions.assertEquals(gameDAO.getGame(gameHasNoPlayers.gameId()).whiteUsername(),authorizedPlayer.username(),
+        Assertions.assertEquals(gameDAO.getGame(gameHasNoPlayers.gameID()).whiteUsername(),authorizedPlayer.username(),
                 "White username did not match given username");
     }
 
@@ -165,7 +165,7 @@ class GameServiceTests {
         JoinGameRequest request = new JoinGameRequest(
                 authorizedPlayer.authToken(),
                 ChessGame.TeamColor.WHITE,
-                gameHasTwoPlayers.gameId());
+                gameHasTwoPlayers.gameID());
         Assertions.assertThrows(AlreadyTakenException.class, () -> service.joinGame(request));
     }
 }

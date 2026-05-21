@@ -9,7 +9,7 @@ import model.results.ListGamesResult;
 import org.jetbrains.annotations.NotNull;
 import service.GameService;
 
-public class ListaGamesHandler implements Handler {
+public class ListGamesHandler implements Handler {
     @Override
     public void handle(@NotNull Context context) throws Exception {
         Gson serializer = new Gson();

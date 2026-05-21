@@ -70,10 +70,10 @@ public class UserService {
         }
 
         // Now check if there's a previous Auth and delete it
-        AuthData oldAuth = myAuthDAO.getAuthByUser(username);
-        if(oldAuth != null){
-            myAuthDAO.deleteAuth(oldAuth);
-        }
+        //AuthData oldAuth = myAuthDAO.getAuthByUser(username);
+        //if(oldAuth != null){
+        //    myAuthDAO.deleteAuth(oldAuth);
+        //}
 
         // Generate a new authToken and make a new AuthData object
         String authToken = AuthService.generateToken();

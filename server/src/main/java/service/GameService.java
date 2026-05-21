@@ -62,8 +62,8 @@ public class GameService {
         int gameID = GameService.generateGameID();
         GameData gameToSave = new GameData(
           gameID,
-          "",
-          "",
+          null,
+          null,
           gameName,
           new ChessGame()
         );
@@ -82,7 +82,7 @@ public class GameService {
      *                               or the gameID doesn't exist
      * @throws AlreadyTakenException If the game already has a player of the selected color
      */
-    public void joinGame(JoinGameRequest joinGameRequest) throws UnauthorizedException, AlreadyTakenException{
+    public void joinGame(JoinGameRequest joinGameRequest) throws UnauthorizedException, AlreadyTakenException, BadRequestException{
         String authToken = joinGameRequest.authToken();
         ChessGame.TeamColor playerColor = joinGameRequest.playerColor();
         int gameId = joinGameRequest.gameID();
@@ -97,13 +97,13 @@ public class GameService {
         // Get game id if exists
         GameData gameData = myGameDAO.getGame(gameId);
         if(gameData == null){
-            throw new UnauthorizedException("unauthorized");
+            throw new BadRequestException("bad request");
         }
 
         // Check to see if there is already player at color
         GameData dataToSave;
         if(playerColor == ChessGame.TeamColor.WHITE){
-            if(gameData.whiteUsername() == null){
+            if(Objects.equals(gameData.whiteUsername(), null)){
                 dataToSave = new GameData(gameData, username, gameData.blackUsername());
             }
             else if(Objects.equals(gameData.whiteUsername(), username)){
@@ -114,7 +114,7 @@ public class GameService {
             }
         }
         else{
-            if(gameData.blackUsername() == null){
+            if(Objects.equals(gameData.blackUsername(), null)){
                 dataToSave = new GameData(gameData, gameData.whiteUsername(), username);
             }
             else if(Objects.equals(gameData.blackUsername(), username)){
