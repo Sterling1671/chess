@@ -18,22 +18,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameService {
 
-    private static final GameDAO myGameDAO = new MemoryGameDAO();
-    private static final AuthDAO myAuthDAO = new MemoryAuthDAO();
+    private static final GameDAO GAME_DAO = new MemoryGameDAO();
+    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
     // The internet says I need to be thread safe for servers I guess
-    private static final AtomicInteger gameIDCount = new AtomicInteger(1);
-    private static final ConcurrentLinkedQueue<Integer> recycledID = new ConcurrentLinkedQueue<>();
+    private static final AtomicInteger GAME_ID_COUNT = new AtomicInteger(1);
+    private static final ConcurrentLinkedQueue<Integer> RECYCLED_ID = new ConcurrentLinkedQueue<>();
 
     /**
      * Generates a unique game ID. Uses a queue to recycle old game IDs that aren't in use
      * @return the new gameID to be used
      */
     public static int generateGameID(){
-        Integer ID = recycledID.poll();
-        if(ID != null){
-            return ID;
+        Integer id = RECYCLED_ID.poll();
+        if(id != null){
+            return id;
         }
-        return gameIDCount.getAndIncrement();
+        return GAME_ID_COUNT.getAndIncrement();
     }
 
     /**
@@ -47,7 +47,7 @@ public class GameService {
         String authToken = listGamesRequest.authToken();
 
         AuthService.checkIfAuthorized(authToken);
-        return new ListGamesResult(new ArrayList<>(myGameDAO.listGames()));
+        return new ListGamesResult(new ArrayList<>(GAME_DAO.listGames()));
     }
 
 
@@ -69,7 +69,7 @@ public class GameService {
         );
 
         // Save the game
-        myGameDAO.createGame(gameToSave);
+        GAME_DAO.createGame(gameToSave);
 
         return new CreateGameResult(gameID);
     }
@@ -91,11 +91,11 @@ public class GameService {
         AuthService.checkIfAuthorized(authToken);
 
         // If authorized, get auth data
-        AuthData authData = myAuthDAO.getAuth(authToken);
+        AuthData authData = AUTH_DAO.getAuth(authToken);
         String username = authData.username();
 
         // Get game id if exists
-        GameData gameData = myGameDAO.getGame(gameId);
+        GameData gameData = GAME_DAO.getGame(gameId);
         if(gameData == null){
             throw new BadRequestException("bad request");
         }
@@ -126,15 +126,15 @@ public class GameService {
         }
 
         // Remove the old game from file and add the new one
-        myGameDAO.updateGame(dataToSave);
+        GAME_DAO.updateGame(dataToSave);
     }
 
     /**
      * Clears the GameDAO associated with GameService
      */
     public void clear(){
-        gameIDCount.set(1);
-        recycledID.clear();
-        myGameDAO.clear();
+        GAME_ID_COUNT.set(1);
+        RECYCLED_ID.clear();
+        GAME_DAO.clear();
     }
 }

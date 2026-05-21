@@ -144,7 +144,7 @@ class GameServiceTests {
                 authorizedPlayer.authToken(),
                 ChessGame.TeamColor.WHITE,
                 100);
-        Assertions.assertThrows(UnauthorizedException.class, () -> service.joinGame(request));
+        Assertions.assertThrows(BadRequestException.class, () -> service.joinGame(request));
     }
 
     @Test

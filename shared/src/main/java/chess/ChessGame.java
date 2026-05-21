@@ -15,8 +15,8 @@ public class ChessGame {
      ****************************************************************/
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
-    Castling.MoveTracker WhiteMoves = new Castling.MoveTracker(1);
-    Castling.MoveTracker BlackMoves = new Castling.MoveTracker(8);
+    Castling.MoveTracker whiteMoves = new Castling.MoveTracker(1);
+    Castling.MoveTracker blackMoves = new Castling.MoveTracker(8);
 
     /**
      * Enum identifying the 2 possible teams in a chess game
@@ -102,14 +102,14 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(startPosition);
 
         // Makes sure there's a piece here
-        if(piece == null) return null;
+        if(piece == null) {return null;}
 
         // unchecked moves is filled with all the possible moves from pieceMoves
         List<ChessMove> uncheckedMoves = new ArrayList<>(piece.pieceMoves(board, startPosition));
         List<ChessMove> validMoves = new ArrayList<>();
         // Each move is checked for validity and only then moved to validMoves
         for(ChessMove move : uncheckedMoves){
-            if(this.TestMoveValidity(move)){
+            if(this.testMoveValidity(move)){
                 validMoves.add(move);
             }
         }
@@ -123,12 +123,12 @@ public class ChessGame {
      * @param move the move to check
      * @return true if the move is valid, false if not
      */
-    public boolean TestMoveValidity(ChessMove move){
+    public boolean testMoveValidity(ChessMove move){
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
         ChessPiece takenPiece = board.getPiece(end);
-        Castling.MoveTracker tracker = piece.getTeamColor() == TeamColor.WHITE ? WhiteMoves : BlackMoves;
+        Castling.MoveTracker tracker = piece.getTeamColor() == TeamColor.WHITE ? whiteMoves : blackMoves;
 
         // CHECK CASTLE
         // I finally learned about short circuit checks, this uses that
@@ -165,7 +165,7 @@ public class ChessGame {
         ChessPiece pieceToMove = board.getPiece(start);
 
         // Checks if piece exists
-        if(pieceToMove == null) throw new InvalidMoveException("Invalid Move");
+        if(pieceToMove == null) {throw new InvalidMoveException("Invalid Move");}
 
         // First checks if the move is a castle(set castle flag) or En Passant
         Castling.checkIfCastle(move, this.board);
@@ -176,10 +176,10 @@ public class ChessGame {
         List<ChessMove> validMoves = new ArrayList<>(this.validMoves(start));
 
         // 2. Checks if piece is the right turn
-        if(pieceToMove.getTeamColor() != currentTeamTurn) throw new InvalidMoveException("Invalid Move");
+        if(pieceToMove.getTeamColor() != currentTeamTurn) {throw new InvalidMoveException("Invalid Move");}
 
         // 3. Makes sure the move given is in the validMoves array
-        if(!validMoves.contains(move)) throw new InvalidMoveException("Invalid Move");
+        if(!validMoves.contains(move)) {throw new InvalidMoveException("Invalid Move");}
 
         // ***********************
         // MAKE THE MOVE
@@ -192,7 +192,7 @@ public class ChessGame {
                 new ChessPiece(pieceToMove.getTeamColor(),pieceToPlaceType);
 
         // 2. If rooks or kings are moved change flags
-        Castling.MoveTracker tracker = pieceToMove.getTeamColor() == TeamColor.WHITE ? WhiteMoves : BlackMoves;
+        Castling.MoveTracker tracker = pieceToMove.getTeamColor() == TeamColor.WHITE ? whiteMoves : blackMoves;
         tracker.setMoves(move, this.board);
 
         // 3. If pawn moved 2 tiles set enPassant tile
@@ -228,8 +228,9 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         TeamColor otherColor;
-        if(teamColor == TeamColor.WHITE)
+        if(teamColor == TeamColor.WHITE) {
             otherColor = TeamColor.BLACK;
+        }
         else{
             otherColor = TeamColor.WHITE;
         }
@@ -255,14 +256,14 @@ public class ChessGame {
         // as even one is valid this returns false
 
         // Make sure the king is actually in check
-        if(!this.isInCheck(teamColor)) return false;
+        if(!this.isInCheck(teamColor)) {return false;}
 
         // This is all the moves the team can make
         List<ChessMove> teamMoves = new ArrayList<>(board.getTeamMoves(teamColor));
         List<ChessMove> validMoves = new ArrayList<>();
 
         for(ChessMove move : teamMoves){
-            if(this.TestMoveValidity(move)){
+            if(this.testMoveValidity(move)){
                 validMoves.add(move);
             }
         }
@@ -278,14 +279,14 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         // Make sure the king is actually in check
-        if(this.isInCheck(teamColor)) return false;
+        if(this.isInCheck(teamColor)) {return false;}
 
         // This is all the moves the team can make
         List<ChessMove> teamMoves = new ArrayList<>(board.getTeamMoves(teamColor));
         List<ChessMove> validMoves = new ArrayList<>();
 
         for(ChessMove move : teamMoves){
-            if(this.TestMoveValidity(move)){
+            if(this.testMoveValidity(move)){
                 validMoves.add(move);
             }
         }

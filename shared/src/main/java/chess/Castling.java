@@ -131,7 +131,7 @@ public class Castling {
             movesToBeChecked.add(new ChessMove(move.getStartPosition(),end,null));
         }
         for(ChessMove move1 : movesToBeChecked){
-            boolean check = game.TestMoveValidity(move1);
+            boolean check = game.testMoveValidity(move1);
             if(!check){return false;}
         }
 

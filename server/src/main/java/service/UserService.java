@@ -13,8 +13,8 @@ import java.util.Objects;
 
 public class UserService {
 
-    private static final UserDAO myUserDAO = new MemoryUserDAO();
-    private static final AuthDAO myAuthDAO = new MemoryAuthDAO();
+    private static final UserDAO USER_DAO = new MemoryUserDAO();
+    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
 
     /**
      * Registers a user in the database with the provided username, password and email.
@@ -29,19 +29,19 @@ public class UserService {
         String username = registerRequest.username();
 
         // Check if there's already a user by that name
-        UserData checkUsername = myUserDAO.getUser(username);
+        UserData checkUsername = USER_DAO.getUser(username);
 
         // If there is throw an exception
         if(checkUsername != null){throw new AlreadyTakenException("username already taken");}
 
         // If not, fill the UserData and send it to the DAO
         UserData userToSave = new UserData(registerRequest);
-        myUserDAO.createUser(userToSave);
+        USER_DAO.createUser(userToSave);
 
         // Then fill out the auth data
         String authToken = AuthService.generateToken();
         AuthData authToSave = new AuthData(authToken, username);
-        myAuthDAO.createAuth(authToSave);
+        AUTH_DAO.createAuth(authToSave);
 
         return new RegisterResult(authToSave);
     }
@@ -59,7 +59,7 @@ public class UserService {
         String password = loginRequest.password();
 
         // Check if there's already a UserData by that name
-        UserData checkData = myUserDAO.getUser(username);
+        UserData checkData = USER_DAO.getUser(username);
 
         // If there isn't throw an exception
         if(checkData == null){throw new UnauthorizedException("unauthorized");}
@@ -69,16 +69,10 @@ public class UserService {
             throw new UnauthorizedException("unauthorized");
         }
 
-        // Now check if there's a previous Auth and delete it
-        //AuthData oldAuth = myAuthDAO.getAuthByUser(username);
-        //if(oldAuth != null){
-        //    myAuthDAO.deleteAuth(oldAuth);
-        //}
-
         // Generate a new authToken and make a new AuthData object
         String authToken = AuthService.generateToken();
         AuthData authToSave = new AuthData(authToken, username);
-        myAuthDAO.createAuth(authToSave);
+        AUTH_DAO.createAuth(authToSave);
         return new LoginResult(authToSave);
     }
 
@@ -92,19 +86,19 @@ public class UserService {
         String authToken = logoutRequest.authToken();
 
         // Check if it exists
-        AuthData checkAuth = myAuthDAO.getAuth(authToken);
+        AuthData checkAuth = AUTH_DAO.getAuth(authToken);
         if(checkAuth == null){
             throw new UnauthorizedException("unauthorized");
         }
 
         // If it does exist, remove it
-        myAuthDAO.deleteAuth(checkAuth);
+        AUTH_DAO.deleteAuth(checkAuth);
     }
 
     /**
      * Clears the UserDAO associated with UserService
      */
     public void clear(){
-        myUserDAO.clear();
+        USER_DAO.clear();
     }
 }

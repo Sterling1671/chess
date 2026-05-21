@@ -32,21 +32,7 @@ public class PawnMove implements PieceMove{
                     new ChessPosition(1,-1),
                     new ChessPosition(1,1)
             );
-            for(ChessPosition direction : validDirections){
-                positionToCheck = myPosition.add(direction);
-                if(positionToCheck.isInBounds()){
-                    ChessPiece piece = board.getPiece(positionToCheck);
-                    if(piece != null) {
-                        if (piece.getTeamColor() != myColor) {
-                            validMoves.addAll(checkPromotion(myPosition, positionToCheck, myColor));
-                        }
-                    }
-                    else if(Objects.equals(positionToCheck,board.enPassantTile)){
-                        ChessMove enPassantMove = new ChessMove(myPosition, positionToCheck, null);
-                        enPassantMove.setEnPassantMove(true);
-                        validMoves.add(enPassantMove);                    }
-                }
-            }
+            CheckDiagonals(board, myPosition, validMoves, myColor, validDirections);
         }
         else{
             ChessPosition positionToCheck = myPosition.add(new ChessPosition(-1,0));
@@ -68,25 +54,31 @@ public class PawnMove implements PieceMove{
                     new ChessPosition(-1,-1),
                     new ChessPosition(-1,1)
             );
-            for(ChessPosition direction : validDirections){
-                positionToCheck = myPosition.add(direction);
-                if(positionToCheck.isInBounds()){
-                    ChessPiece piece = board.getPiece(positionToCheck);
-                    if(piece != null) {
-                        if (piece.getTeamColor() != myColor) {
-                            validMoves.addAll(checkPromotion(myPosition, positionToCheck, myColor));
-                        }
-                    }
-                    else if(Objects.equals(positionToCheck,board.enPassantTile)){
-                        ChessMove enPassantMove = new ChessMove(myPosition, positionToCheck, null);
-                        enPassantMove.setEnPassantMove(true);
-                        validMoves.add(enPassantMove);
-                    }
-                }
-            }
+            CheckDiagonals(board, myPosition, validMoves, myColor, validDirections);
         }
         return validMoves;
     }
+
+    private void CheckDiagonals(ChessBoard board, ChessPosition myPosition, List<ChessMove> validMoves, ChessGame.TeamColor myColor, List<ChessPosition> validDirections) {
+        ChessPosition positionToCheck;
+        for(ChessPosition direction : validDirections){
+            positionToCheck = myPosition.add(direction);
+            if(positionToCheck.isInBounds()){
+                ChessPiece piece = board.getPiece(positionToCheck);
+                if(piece != null) {
+                    if (piece.getTeamColor() != myColor) {
+                        validMoves.addAll(checkPromotion(myPosition, positionToCheck, myColor));
+                    }
+                }
+                else if(Objects.equals(positionToCheck,board.enPassantTile)){
+                    ChessMove enPassantMove = new ChessMove(myPosition, positionToCheck, null);
+                    enPassantMove.setEnPassantMove(true);
+                    validMoves.add(enPassantMove);
+                }
+            }
+        }
+    }
+
     public Collection<ChessMove> checkPromotion(ChessPosition myStartPosition, ChessPosition myEndPosition, ChessGame.TeamColor myColor){
         List<ChessMove> validMoves = new ArrayList<>();
         if(myColor == ChessGame.TeamColor.WHITE && myEndPosition.getRow() == 8){
