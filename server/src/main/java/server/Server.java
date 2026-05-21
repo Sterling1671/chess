@@ -9,9 +9,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import model.requests.RegisterRequest;
 import server.exceptions.*;
-import server.handlers.LoginHandler;
-import server.handlers.LogoutHandler;
-import server.handlers.RegistrationHandler;
+import server.handlers.*;
 
 public class Server {
 
@@ -39,6 +37,10 @@ public class Server {
         javalinServer.post("/user", new RegistrationHandler());
         javalinServer.post("/session", new LoginHandler());
         javalinServer.delete("/session", new LogoutHandler());
+        javalinServer.get("/game", new ListaGamesHandler());
+        javalinServer.post("/game", new CreateGameHandler());
+        javalinServer.put("/game", new JoinGameHangler());
+        javalinServer.delete("/db",new ClearGameHandler());
     }
     private void createExceptions(Javalin javalinServer){
         javalinServer.exception(JsonSyntaxException.class, new JsonSyntaxHandler());

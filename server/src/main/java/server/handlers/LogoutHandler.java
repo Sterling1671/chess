@@ -14,12 +14,14 @@ public class LogoutHandler implements Handler {
     @Override
     public void handle(@NotNull Context context) throws BadRequestException {
         Gson serializer = new Gson();
-        LogoutRequest request = serializer.fromJson(context.body(), LogoutRequest.class);
-        if(request.authToken() == null){
+        String authToken = context.header("Authorization");
+        if(authToken == null){
             throw new BadRequestException("bad request");
         }
+        LogoutRequest request = new LogoutRequest(authToken);
+
         UserService service = new UserService();
         service.logout(request);
-        context.json(Map.of());
+        context.json(serializer.toJson(Map.of()));
     }
 }
