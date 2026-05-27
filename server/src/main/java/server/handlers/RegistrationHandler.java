@@ -2,6 +2,7 @@ package server.handlers;
 
 import com.google.gson.Gson;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.requests.RegisterRequest;
@@ -12,7 +13,7 @@ import service.UserService;
 public class RegistrationHandler implements Handler {
 
     @Override
-    public void handle(@NotNull Context context) throws BadRequestException {
+    public void handle(@NotNull Context context) throws BadRequestException, DataAccessException {
         Gson serializer = new Gson();
         RegisterRequest request = serializer.fromJson(context.body(), RegisterRequest.class);
         if(request.username() == null || request.password() == null || request.email() == null){

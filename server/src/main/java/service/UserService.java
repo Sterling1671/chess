@@ -24,7 +24,7 @@ public class UserService {
      * @return a RegisterResult object containing the username and authToken saved to the DB
      * @throws AlreadyTakenException if user is already taken, an exception is thrown
      */
-    public RegisterResult register(RegisterRequest registerRequest) throws AlreadyTakenException {
+    public RegisterResult register(RegisterRequest registerRequest) throws AlreadyTakenException, DataAccessException {
         // Get the username from the request
         String username = registerRequest.username();
 
@@ -53,7 +53,7 @@ public class UserService {
      * @return a LoginResult object containing the username and authToken saved to the DB
      * @throws UnauthorizedException if the user doesn't have correct credentials
      */
-    public LoginResult login(LoginRequest loginRequest) throws UnauthorizedException{
+    public LoginResult login(LoginRequest loginRequest) throws UnauthorizedException, DataAccessException {
         // Get the username and password from the request
         String username = loginRequest.username();
         String password = loginRequest.password();
@@ -98,7 +98,7 @@ public class UserService {
     /**
      * Clears the UserDAO associated with UserService
      */
-    public void clear(){
+    public void clear() throws DataAccessException {
         USER_DAO.clear();
     }
 }

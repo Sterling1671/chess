@@ -34,7 +34,7 @@ public class UserServiceTests {
     }
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
         userDAO.createUser(existingUser);
@@ -45,7 +45,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Register a new User")
-    public void registerNewUser(){
+    public void registerNewUser() throws DataAccessException {
         RegisterRequest request = new RegisterRequest(newUser);
         RegisterResult result = service.register(request);
 
@@ -68,7 +68,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Login with existing user")
-    public void loginExistingUser(){
+    public void loginExistingUser() throws DataAccessException {
         String username = existingUser.username();
         String password = existingUser.password();
         LoginRequest request = new LoginRequest(username, password);
