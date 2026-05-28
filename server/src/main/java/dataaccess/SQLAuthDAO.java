@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.AuthData;
-import model.UserData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -51,7 +50,7 @@ public class SQLAuthDAO implements AuthDAO{
     @Override
     public void createAuth(AuthData authData) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "INSERT INTO auth (authKey, name) VALUES (?, ?)";
+            String statement = "INSERT INTO auth (authToken, name) VALUES (?, ?)";
             try (PreparedStatement createAuthStatement = conn.prepareStatement(statement)) {
                 createAuthStatement.setString(1,authData.authToken());
                 createAuthStatement.setString(2, authData.username());

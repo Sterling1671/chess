@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.UnauthorizedException;
 import model.AuthData;
@@ -21,7 +22,7 @@ public class AuthServiceTests {
     }
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         authDAO.clear();
         authDAO.createAuth(authorized);
     }

@@ -92,7 +92,7 @@ public class UserService {
      * @param logoutRequest a LogoutRequest object containing authToken to be removed from DB
      * @throws UnauthorizedException if the user doesn't have correct credentials
      */
-    public void logout(LogoutRequest logoutRequest) throws UnauthorizedException{
+    public void logout(LogoutRequest logoutRequest) throws UnauthorizedException, DataAccessException {
         // Get the auth token from the request
         String authToken = logoutRequest.authToken();
 

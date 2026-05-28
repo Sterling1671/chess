@@ -79,7 +79,7 @@ class GameServiceTests {
     }
 
     @BeforeEach
-    public void setup(){
+    public void setup() throws DataAccessException {
         gameDAO.clear();
         authDAO.clear();
         authDAO.createAuth(authorizedPlayer);
@@ -93,7 +93,7 @@ class GameServiceTests {
 
     @Test
     @DisplayName("List all games authorized")
-    public void listGamesAuthorized() {
+    public void listGamesAuthorized() throws DataAccessException {
         ListGamesRequest request = new ListGamesRequest(authorizedPlayer.authToken());
         ListGamesResult result = service.listGames(request);
         Collection<GameData> correctList = new ArrayList<>(List.of(
@@ -114,7 +114,7 @@ class GameServiceTests {
 
     @Test
     @DisplayName("Create game authorized")
-    void createGameAuthorized() {
+    void createGameAuthorized() throws DataAccessException {
         CreateGameRequest request = new CreateGameRequest(authorizedPlayer.authToken(),"Authorized Game");
         CreateGameResult result = service.createGame(request);
         Assertions.assertEquals(gameDAO.getGame(result.gameID()).gameName(),request.gameName());
@@ -149,7 +149,7 @@ class GameServiceTests {
 
     @Test
     @DisplayName("Join game with no players")
-    public void joinGameNoPlayers() {
+    public void joinGameNoPlayers() throws DataAccessException {
         JoinGameRequest request = new JoinGameRequest(
                 authorizedPlayer.authToken(),
                 ChessGame.TeamColor.WHITE,

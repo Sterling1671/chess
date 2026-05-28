@@ -43,7 +43,7 @@ public class GameService {
      * @return a list of all games in the DB
      * @throws UnauthorizedException if the authToken isn't valid
      */
-    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws UnauthorizedException{
+    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws UnauthorizedException, DataAccessException {
         String authToken = listGamesRequest.authToken();
 
         AuthService.checkIfAuthorized(authToken);
@@ -51,7 +51,7 @@ public class GameService {
     }
 
 
-    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws UnauthorizedException{
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws UnauthorizedException, DataAccessException {
         String authToken = createGameRequest.authToken();
         String gameName = createGameRequest.gameName();
 
@@ -82,7 +82,7 @@ public class GameService {
      *                               or the gameID doesn't exist
      * @throws AlreadyTakenException If the game already has a player of the selected color
      */
-    public void joinGame(JoinGameRequest joinGameRequest) throws UnauthorizedException, AlreadyTakenException, BadRequestException{
+    public void joinGame(JoinGameRequest joinGameRequest) throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         String authToken = joinGameRequest.authToken();
         ChessGame.TeamColor playerColor = joinGameRequest.playerColor();
         int gameId = joinGameRequest.gameID();

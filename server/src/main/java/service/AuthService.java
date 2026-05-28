@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.UnauthorizedException;
 
@@ -22,12 +23,12 @@ public class AuthService {
      * @param authToken the token to check
      * @throws UnauthorizedException if the token isn't authorized
      */
-    public static void checkIfAuthorized(String authToken) throws UnauthorizedException{
+    public static void checkIfAuthorized(String authToken) throws UnauthorizedException, DataAccessException {
         if(AUTH_DAO.getAuth(authToken) == null){
             throw new UnauthorizedException("unauthorized");
         }
     }
-    public void clear(){
+    public void clear() throws DataAccessException {
         AUTH_DAO.clear();
     }
 }

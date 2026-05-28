@@ -2,6 +2,7 @@ package server.handlers;
 
 import com.google.gson.Gson;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import model.requests.LogoutRequest;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public class LogoutHandler implements Handler {
     @Override
-    public void handle(@NotNull Context context) throws BadRequestException {
+    public void handle(@NotNull Context context) throws BadRequestException, DataAccessException {
         Gson serializer = new Gson();
         String authToken = context.header("Authorization");
         if(authToken == null){

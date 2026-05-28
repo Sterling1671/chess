@@ -103,7 +103,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Logout logged in user")
-    public void logoutLoggedInUser(){
+    public void logoutLoggedInUser() throws DataAccessException {
         String authToken = loggedInUserAuth.authToken();
         Assertions.assertNotNull(authDAO.getAuth(authToken));
 
