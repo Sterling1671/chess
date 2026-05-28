@@ -38,4 +38,23 @@ public class UserDAOTests {
         Assertions.assertNull(userDAO.getUser(newUser.username()));
     }
 
+    @Test
+    @DisplayName("Try to add existing user")
+    public void addExistingUser(){
+        Assertions.assertThrows(DataAccessException.class, () -> userDAO.createUser(existingUser));
+    }
+
+    @Test
+    @DisplayName("Add new user")
+    public void addNewUser(){
+        Assertions.assertDoesNotThrow(() -> userDAO.createUser(newUser));
+    }
+
+    @Test
+    @DisplayName("Clear DB")
+    public void clearDB() throws DataAccessException {
+        Assertions.assertDoesNotThrow(() -> userDAO.clear());
+        Assertions.assertNull(userDAO.getUser(existingUser.username()));
+    }
+
 }

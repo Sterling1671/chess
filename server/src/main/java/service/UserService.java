@@ -8,6 +8,7 @@ import model.requests.LogoutRequest;
 import model.requests.RegisterRequest;
 import model.results.LoginResult;
 import model.results.RegisterResult;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Objects;
 
@@ -35,7 +36,10 @@ public class UserService {
         if(checkUsername != null){throw new AlreadyTakenException("username already taken");}
 
         // If not, fill the UserData and send it to the DAO
-        UserData userToSave = new UserData(registerRequest);
+        UserData userReceived = new UserData(registerRequest);
+        // Hash the password
+        UserData userToSave = new UserData(userReceived, BCrypt.hashpw(userReceived.password(), BCrypt.gensalt()));
+        // Save the user
         USER_DAO.createUser(userToSave);
 
         // Then fill out the auth data
@@ -65,8 +69,15 @@ public class UserService {
         if(checkData == null){throw new UnauthorizedException("unauthorized");}
 
         // Now check the password
-        if(!Objects.equals(checkData.password(), password)){
-            throw new UnauthorizedException("unauthorized");
+        try {
+            if (!BCrypt.checkpw(password, checkData.password())) {
+                throw new UnauthorizedException("unauthorized");
+            }
+        }
+        catch(IllegalArgumentException e){
+            if (!Objects.equals(checkData.password(),password)){
+                throw new UnauthorizedException("unauthorized");
+            }
         }
 
         // Generate a new authToken and make a new AuthData object
