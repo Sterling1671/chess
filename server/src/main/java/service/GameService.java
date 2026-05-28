@@ -132,7 +132,7 @@ public class GameService {
     /**
      * Clears the GameDAO associated with GameService
      */
-    public void clear(){
+    public void clear() throws DataAccessException {
         GAME_ID_COUNT.set(1);
         RECYCLED_ID.clear();
         GAME_DAO.clear();
