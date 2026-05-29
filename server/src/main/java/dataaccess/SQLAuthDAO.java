@@ -1,10 +1,12 @@
 package dataaccess;
 
 import model.AuthData;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class SQLAuthDAO implements AuthDAO{
     public SQLAuthDAO() throws DataAccessException {
@@ -46,13 +48,9 @@ public class SQLAuthDAO implements AuthDAO{
             String statement = "SELECT authToken, name FROM auth WHERE authToken=?";
             try (PreparedStatement getAuthStatement = conn.prepareStatement(statement)) {
                 getAuthStatement.setString(1,authToken);
-                try (ResultSet rs = getAuthStatement.executeQuery()) {
-                    if (rs.next()) {
-                        return new AuthData(
-                                rs.getString("authToken"),
-                                rs.getString("name")
-                        );
-                    }
+                AuthData rs = getAuthData(getAuthStatement);
+                if (rs != null) {
+                    return rs;
                 }
             }
         }
@@ -69,18 +67,27 @@ public class SQLAuthDAO implements AuthDAO{
             String statement = "SELECT authToken, name FROM auth WHERE name=?";
             try (PreparedStatement getAuthStatement = conn.prepareStatement(statement)) {
                 getAuthStatement.setString(1,username);
-                try (ResultSet rs = getAuthStatement.executeQuery()) {
-                    if (rs.next()) {
-                        return new AuthData(
-                                rs.getString("authToken"),
-                                rs.getString("name")
-                        );
-                    }
+                AuthData rs = getAuthData(getAuthStatement);
+                if (rs != null) {
+                    return rs;
                 }
             }
         }
         catch (Exception e) {
             throw new DataAccessException("Failed");
+        }
+        return null;
+    }
+
+    @Nullable
+    private static AuthData getAuthData(PreparedStatement getAuthStatement) throws SQLException {
+        try (ResultSet rs = getAuthStatement.executeQuery()) {
+            if (rs.next()) {
+                return new AuthData(
+                        rs.getString("authToken"),
+                        rs.getString("name")
+                );
+            }
         }
         return null;
     }
