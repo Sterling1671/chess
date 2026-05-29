@@ -17,9 +17,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class GameService {
-
-    private static final GameDAO GAME_DAO = new MemoryGameDAO();
-    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
+    private static final GameDAO GAME_DAO;
+    private static final AuthDAO AUTH_DAO;
+    static {
+        try {
+            GAME_DAO = new SQLGameDAO();
+            AUTH_DAO = new SQLAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
     // The internet says I need to be thread safe for servers I guess
     private static final AtomicInteger GAME_ID_COUNT = new AtomicInteger(1);
     private static final ConcurrentLinkedQueue<Integer> RECYCLED_ID = new ConcurrentLinkedQueue<>();

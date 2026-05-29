@@ -1,14 +1,19 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 
 import java.util.UUID;
 
 public class AuthService {
-    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
+    private static final AuthDAO AUTH_DAO;
+    static {
+        try{
+             AUTH_DAO = new SQLAuthDAO();
+        }
+        catch(DataAccessException e){
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Generates a new unique authToken

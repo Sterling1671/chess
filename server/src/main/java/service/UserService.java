@@ -14,8 +14,18 @@ import java.util.Objects;
 
 public class UserService {
 
-    private static final UserDAO USER_DAO = new MemoryUserDAO();
-    private static final AuthDAO AUTH_DAO = new MemoryAuthDAO();
+    private static final UserDAO USER_DAO;
+    private static final AuthDAO AUTH_DAO;
+    static {
+        try {
+            USER_DAO = new SQLUserDAO();
+            AUTH_DAO = new SQLAuthDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
     /**
      * Registers a user in the database with the provided username, password and email.
