@@ -32,9 +32,9 @@ class GameServiceTests {
 
 
     @BeforeAll
-    public static void init() {
-        gameDAO = new MemoryGameDAO();
-        authDAO = new MemoryAuthDAO();
+    public static void init() throws DataAccessException {
+        gameDAO = new SQLGameDAO();
+        authDAO = new SQLAuthDAO();
         service = new GameService();
         gameHasNoPlayers = new GameData(
                 GameService.generateGameID(),

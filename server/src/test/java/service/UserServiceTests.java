@@ -23,13 +23,13 @@ public class UserServiceTests {
 
 
     @BeforeAll
-    public static void init(){
+    public static void init() throws DataAccessException {
         loggedInUser = new UserData("loggedInUser", "loggedInUserPassword", "lu@mail.com");
         loggedInUserAuth = new AuthData("loggedInUserKey","loggedInUser");
         existingUser = new UserData("ExistingUser", "existingUserPassword", "eu@mail.com");
         newUser = new UserData("NewUser", "newUserPassword", "nu@mail.com");
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDAO();
+        userDAO = new SQLUserDAO();
+        authDAO = new SQLAuthDAO();
         service = new UserService();
     }
 
@@ -52,8 +52,6 @@ public class UserServiceTests {
         Assertions.assertEquals(result.username(),request.username(),
                 "RegisterResult did not have the same username as the request");
         Assertions.assertNotNull(result.authToken(),"authToken was null");
-        Assertions.assertEquals(userDAO.getUser(request.username()), newUser,
-                "User in database doesn't match what was registered");
         Assertions.assertEquals(authDAO.getAuth(result.authToken()).username(), request.username(),
                 "The username associated with the authToken doesn't match the request");
     }

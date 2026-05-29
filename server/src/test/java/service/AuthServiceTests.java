@@ -1,9 +1,6 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.UnauthorizedException;
+import dataaccess.*;
 import model.AuthData;
 import org.junit.jupiter.api.*;
 
@@ -14,8 +11,8 @@ public class AuthServiceTests {
     private static AuthData unauthorized;
 
     @BeforeAll
-    public static void init() {
-        authDAO = new MemoryAuthDAO();
+    public static void init() throws DataAccessException {
+        authDAO = new SQLAuthDAO();
         authorized = new AuthData("authorizedToken", "authorizedUser");
         unauthorized = new AuthData("unauthorizedToken", "unauthorizedUser");
 
