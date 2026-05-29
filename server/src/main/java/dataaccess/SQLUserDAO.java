@@ -1,17 +1,14 @@
 package dataaccess;
 
 import model.UserData;
-import java.sql.SQLException;
 import java.sql.*;
 
 
 public class SQLUserDAO implements UserDAO {
 
     public SQLUserDAO() throws DataAccessException {
-        configureDatabase();
-    }
-    private final String[] createStatements = {
-            """
+        String[] createStatements = {
+                """
             CREATE TABLE IF NOT EXISTS  users (
               `name` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
@@ -20,23 +17,8 @@ public class SQLUserDAO implements UserDAO {
               INDEX(email)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
-    };
-
-    /**
-     * Adds the users table to the current database if it doesn't exist
-     * @throws DataAccessException if the SQL fails
-     */
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-        }
+        };
+        DatabaseManager.configureDatabase(createStatements);
     }
 
     /**
@@ -45,14 +27,7 @@ public class SQLUserDAO implements UserDAO {
      */
     @Override
     public void clear() throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "TRUNCATE TABLE users";
-            try (PreparedStatement deleteTableStatement = conn.prepareStatement(statement)) {
-                deleteTableStatement.executeUpdate();
-            }
-        } catch (Exception e) {
-            throw new DataAccessException("Failed");
-        }
+        DatabaseManager.clearTable("users");
     }
 
     /**

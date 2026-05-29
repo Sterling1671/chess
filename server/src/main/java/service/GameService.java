@@ -89,7 +89,11 @@ public class GameService {
      *                               or the gameID doesn't exist
      * @throws AlreadyTakenException If the game already has a player of the selected color
      */
-    public void joinGame(JoinGameRequest joinGameRequest) throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
+    public void joinGame(JoinGameRequest joinGameRequest)
+            throws UnauthorizedException,
+            AlreadyTakenException,
+            BadRequestException,
+            DataAccessException {
         String authToken = joinGameRequest.authToken();
         ChessGame.TeamColor playerColor = joinGameRequest.playerColor();
         int gameId = joinGameRequest.gameID();

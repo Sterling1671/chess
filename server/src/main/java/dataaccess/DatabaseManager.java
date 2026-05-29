@@ -74,4 +74,32 @@ public class DatabaseManager {
         var port = Integer.parseInt(props.getProperty("db.port"));
         connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
     }
+
+    /**
+     * Adds the users table to the current database if it doesn't exist
+     * @throws DataAccessException if the SQL fails
+     */
+    public static void configureDatabase(String[] createStatements) throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
+
+    public static void clearTable(String table) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = String.format("TRUNCATE TABLE %s", table);
+            try (PreparedStatement deleteTableStatement = conn.prepareStatement(statement)) {
+                deleteTableStatement.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Failed");
+        }
+    }
 }
