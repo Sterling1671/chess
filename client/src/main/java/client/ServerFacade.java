@@ -1,14 +1,12 @@
 package client;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import model.requests.*;
 import model.results.CreateGameResult;
 import model.results.ListGamesResult;
 import model.results.LoginResult;
 import model.results.RegisterResult;
-import ui.EscapeSequences;
-
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -23,34 +21,42 @@ public class ServerFacade {
         serverURL = url;
     }
 
-    public LoginResult login(LoginRequest request) throws IOException, InterruptedException {
-        LoginRequest request = new LoginRequest(args[0], args[1]);
+    public LoginResult login(LoginRequest request) throws ResponseException {
         String body = new Gson().toJson(request);
-        HttpResponse<String> response = ClientHelper.sendRequest(BASE_URL + "session", "POST", body, null);
-        if(ClientHelper.checkResponse(response)) {
-            LoginResult result = new Gson().fromJson(response.body(), LoginResult.class);
-            AUTH_TOKEN = result.authToken();
-
-        }
+        HttpResponse<String> response = sendRequest(serverURL + "session", "POST", body, null);
+        checkResponse(response);
+        return new Gson().fromJson(response.body(), LoginResult.class);
     }
-    public RegisterResult register(RegisterRequest request){
-
+    public RegisterResult register(RegisterRequest request) throws ResponseException{
+        String body = new Gson().toJson(request);
+        HttpResponse<String> response = sendRequest(serverURL + "user", "POST", body, null);
+        checkResponse(response);
+        return new Gson().fromJson(response.body(), RegisterResult.class);
     }
-    public void logout(LogoutRequest request){
-
+    public void logout(LogoutRequest request) throws ResponseException{
+        HttpResponse<String> response = sendRequest(serverURL + "session", "DELETE", null, request.authToken());
+        checkResponse(response);
     }
-    public CreateGameResult createGame(CreateGameRequest request){
-
+    public CreateGameResult createGame(CreateGameRequest request) throws ResponseException{
+        String body = new Gson().toJson(request.gameName());
+        HttpResponse<String> response = sendRequest(serverURL + "game", "POST", body, request.authToken());
+        checkResponse(response);
+        return new Gson().fromJson(response.body(), CreateGameResult.class);
     }
-    public ListGamesResult listGames(ListGamesRequest request){
-
+    public ListGamesResult listGames(ListGamesRequest request) throws ResponseException{
+        HttpResponse<String> response = sendRequest(serverURL + "game", "GET", null, request.authToken());
+        checkResponse(response);
+        return new Gson().fromJson(response.body(), ListGamesResult.class);
     }
-    public void joinGame(JoinGameRequest request){
-
+    public void joinGame(JoinGameRequest request) throws ResponseException{
+        String body = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create()
+                .toJson(request);
+        HttpResponse<String> response = sendRequest(serverURL + "game", "PUT", body, request.authToken());
+        checkResponse(response);
     }
-    public static void observeGame(String[] args){
 
-    }
 
 
     /**
@@ -59,16 +65,20 @@ public class ServerFacade {
      * @param body the JSON string you want to send, can be null
      * @param authToken the authToken, can be null
      * @return the response of the handler, given as a string
-     * @throws InterruptedException if the operation is interrupted
-     * @throws IOException  if an I/O error occurs when sending or receiving, or the client has shut down
+     * @throws ResponseException if the operation isn't successful
      */
     private static HttpResponse<String> sendRequest(String url, String method, String body, String authToken)
-            throws InterruptedException, IOException {
+            throws ResponseException{
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url));
         requestBodyBuilder(builder, method, body);
         requestHeaderBuilder(builder, "Authorization", authToken);
         HttpRequest request = builder.build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
+        try {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        }
+        catch(Exception e) {
+            throw new ResponseException("Something went wrong, try again");
+        }
     }
 
     /**
@@ -97,25 +107,15 @@ public class ServerFacade {
 
     /**
      * @param response Http response object returned from the server
-     * @return true if no error occurred, false otherwise
      */
-    private static boolean checkResponse(HttpResponse<String> response) {
+    private static void checkResponse(HttpResponse<String> response) throws ResponseException{
         var statusCode = response.statusCode();
         switch (statusCode){
-            case 200 -> {return true;}
-            case 400 -> System.out.println(
-                    EscapeSequences.SET_TEXT_COLOR_RED +
-                            "Error: That request didn't work, please try again");
-            case 401 -> System.out.println(
-                    EscapeSequences.SET_TEXT_COLOR_RED +
-                            "Error: You're not authorized for that action");
-            case 403 -> System.out.println(
-                    EscapeSequences.SET_TEXT_COLOR_RED +
-                            "Error: That username is already taken");
-            default -> System.out.println(
-                    EscapeSequences.SET_TEXT_COLOR_RED +
-                            "Error: Something went wrong, please try again");
+            case 200 -> {}
+            case 400 -> throw new ResponseException("That request didn't work, please try again");
+            case 401 -> throw new ResponseException("You're not authorized for that action");
+            case 403 -> throw new ResponseException("That username is already taken");
+            default ->  throw new ResponseException("Something went wrong, please try again");
         }
-        return false;
     }
 }

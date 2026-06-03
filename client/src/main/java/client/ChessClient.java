@@ -1,6 +1,8 @@
 package client;
 
+import model.requests.LoginRequest;
 import model.requests.RegisterRequest;
+import model.results.LoginResult;
 import model.results.RegisterResult;
 import ui.EscapeSequences;
 import ui.PostLoginUI;
@@ -47,6 +49,20 @@ public class ChessClient {
                     case HELP -> ui.displayHelp();
                     case QUIT -> running = false;
                     case LOGIN -> {
+                        if(args.length == 2){
+                            LoginRequest request = new LoginRequest(args[0], args[1]);
+
+                            // Attempt to login the user and transition the UI to logged in
+                            try{
+                                LoginResult result = server.login(request);
+                                authToken = result.authToken();
+                                ui.displayMessage("Login successful!");
+                                ui = new PostLoginUI();
+                                state = State.SIGNEDIN;
+                            } catch (ResponseException e) {
+                                ui.displayError(e.getMessage());
+                            }
+                        }
 
                     }
                     case REGISTER -> {
