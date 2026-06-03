@@ -1,4 +1,4 @@
 package ui;
 
-public class PostLoginUI {
+public class PostLoginUI implements UI{
 }

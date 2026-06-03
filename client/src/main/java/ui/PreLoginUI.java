@@ -1,22 +1,14 @@
 package ui;
 
-import client.LoginHandler;
-import client.RegistrationHandler;
+import client.ServerFacade;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class PreLoginUI {
+public class PreLoginUI implements UI{
 
-    private enum Options {
-        HELP,
-        QUIT,
-        LOGIN,
-        REGISTER,
-        UNKNOWN
-    }
-
-    public void displayUI(){
+    public void displayUI() throws IOException, InterruptedException {
         boolean running = true;
         while(running){
             String input = getInput();
@@ -45,8 +37,8 @@ public class PreLoginUI {
             switch (option){
                 case HELP -> displayHelp();
                 case QUIT -> running = false;
-                case LOGIN -> new LoginHandler().handle(args);
-                case REGISTER -> new RegistrationHandler().handle(args);
+                case LOGIN -> ServerFacade.login(args);
+                case REGISTER -> ServerFacade.register(args);
                 case UNKNOWN -> System.out.println(
                                     EscapeSequences.SET_TEXT_COLOR_RED +
                                     "Error: Please enter a valid option (type Help for options)");
