@@ -38,7 +38,10 @@ public class ServerFacade {
         checkResponse(response);
     }
     public CreateGameResult createGame(CreateGameRequest request) throws ResponseException{
-        String body = new Gson().toJson(request.gameName());
+        String body = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create()
+                .toJson(request);
         HttpResponse<String> response = sendRequest(serverURL + "game", "POST", body, request.authToken());
         checkResponse(response);
         return new Gson().fromJson(response.body(), CreateGameResult.class);

@@ -26,7 +26,7 @@ public class ChessClient {
     public void run(){
         UI ui = new PreLoginUI();
         boolean running = true;
-        // TODO startup message
+        ui.displayMessage("Welcome to the CS240 Chess Game!\nType help to start");
         while(running){
             String input = ui.receiveInput();
             if(input.isBlank()) {
@@ -66,7 +66,9 @@ public class ChessClient {
                                 ui.displayError(e.getMessage());
                             }
                         }
-
+                        else{
+                            ui.displayError("Incorrect arguments (Type help for correct formating)");
+                        }
                     }
                     case REGISTER -> {
                         if (args.length == 3) {
@@ -86,7 +88,7 @@ public class ChessClient {
                             ui.displayError("Incorrect arguments (Type help for correct formating)");
                         }
                     }
-                    case UNKNOWN -> ui.displayError("Unknown Argument");
+                    default -> ui.displayError("Unknown Argument");
                 }
             }
             else{
@@ -113,7 +115,7 @@ public class ChessClient {
                             // Attempt to create a game
                             try{
                                 CreateGameResult result = server.createGame(request);
-                                ui.displayMessage("Game created successfully");
+                                ui.displayMessage(String.format("Game created successfully (ID: %d)", result.gameID()));
                             } catch (ResponseException e) {
                                 ui.displayError(e.getMessage());
                             }
@@ -135,15 +137,25 @@ public class ChessClient {
                     }
                     case JOIN -> {
                         if(args.length == 2) {
-                            ChessGame.TeamColor color = Objects.equals(args[1].toUpperCase(), "WHITE") ?
-                                ChessGame.TeamColor.WHITE :
-                                ChessGame.TeamColor.BLACK;
+                            ChessGame.TeamColor color;
+                            if(Objects.equals(args[1].toUpperCase(), "WHITE")){
+                                color = ChessGame.TeamColor.WHITE;
+                            }
+                            else if(Objects.equals(args[1].toUpperCase(), "BLACK")){
+                                color = ChessGame.TeamColor.BLACK;
+                            }
+                            else{
+                                ui.displayError("Please enter a valid color;");
+                                break;
+                            }
+
                             JoinGameRequest request = new JoinGameRequest(
                                     authToken,
                                     color,
-                                    Integer.getInteger(args[0]));
+                                    Integer.parseInt(args[0]));
                             try {
                                 server.joinGame(request);
+                                ui.displayMessage("Game joined successfully");
                             } catch (ResponseException e) {
                                 ui.displayError(e.getMessage());
                             }
@@ -156,14 +168,25 @@ public class ChessClient {
                         if (args.length == 1) {
 
                             ListGamesRequest request = new ListGamesRequest(authToken);
-
+                            int gameID;
+                            try{
+                                gameID = Integer.parseInt(args[0]);
+                            } catch (NumberFormatException e) {
+                                ui.displayError("Incorrect arguments (Type help for correct formating)");
+                                break;
+                            }
                             // Attempt to list games
                             try {
                                 ListGamesResult result = server.listGames(request);
+                                boolean failure = true;
                                 for (GameData data : result.games()) {
-                                    if (Integer.getInteger(args[0]) == data.gameID()) {
-                                        ui.displayGame(data);
+                                    if (gameID == data.gameID()) {
+                                        ui.observeGame(data);
+                                        failure = false;
                                     }
+                                }
+                                if(failure){
+                                    ui.displayError("No game was found with that id");
                                 }
 
                             }
@@ -171,12 +194,15 @@ public class ChessClient {
                                 ui.displayError(e.getMessage());
                             }
                         }
+                        else{
+                            ui.displayError("Incorrect arguments (Type help for correct formating)");
+                        }
                     }
-                    case UNKNOWN -> ui.displayError("Unknown Argument");
+                    default -> ui.displayError("Unknown Argument");
 
                 }
             }
         }
-        // TODO exit message
+        ui.displayMessage("Thanks for playing!");
     }
 }

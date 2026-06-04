@@ -10,6 +10,6 @@ public interface UI {
     void displayError(String error);
     void displayMessage(String message);
     void displayGames(Collection<GameData> games);
-    void displayGame(GameData game);
+    void observeGame(GameData game);
 
 }

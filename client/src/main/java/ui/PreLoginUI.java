@@ -1,9 +1,7 @@
 package ui;
+import model.GameData;
 
-import client.ServerFacade;
-
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Scanner;
 
 public class PreLoginUI implements UI{
@@ -18,16 +16,61 @@ public class PreLoginUI implements UI{
     }
 
     public void displayHelp(){
-
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                        "TODO help"
+        );
     }
 
     @Override
     public void displayError(String error) {
-
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_RED +
+                "Error: "+
+                error
+        );
     }
 
     @Override
     public void displayMessage(String message) {
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_MAGENTA + message
+        );
+    }
 
+    @Override
+    public void displayGames(Collection<GameData> games) {
+        int count = 1;
+        for(GameData game:games){
+            System.out.print(
+                    EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                    String.format("%d. Game name: ", count));
+            System.out.print(
+                    EscapeSequences.SET_TEXT_COLOR_BLUE +
+                    game.gameName());
+            System.out.print(
+                    EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                    " Game id: ");
+            System.out.println(
+                    EscapeSequences.SET_TEXT_COLOR_BLUE +
+                    String.format("%d",game.gameID()));
+            count++;
+        }
+    }
+
+    @Override
+    public void observeGame(GameData game) {
+        System.out.print(
+                EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                "Game name: ");
+        System.out.print(
+                EscapeSequences.SET_TEXT_COLOR_BLUE +
+                game.gameName());
+        System.out.print(
+                EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                " Game id: ");
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_BLUE +
+                String.format("%d",game.gameID()));
     }
 }
