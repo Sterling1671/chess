@@ -1,8 +1,15 @@
 package ui;
 
+import model.GameData;
+
+import java.util.Collection;
+
 public interface UI {
-    public String receiveInput();
-    public void displayHelp();
-    public void displayError(String error);
-    public void displayMessage(String message);
+    String receiveInput();
+    void displayHelp();
+    void displayError(String error);
+    void displayMessage(String message);
+    void displayGames(Collection<GameData> games);
+    void displayGame(GameData game);
+
 }

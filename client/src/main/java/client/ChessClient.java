@@ -1,15 +1,18 @@
 package client;
 
-import model.requests.LoginRequest;
-import model.requests.RegisterRequest;
+import chess.ChessGame;
+import model.GameData;
+import model.requests.*;
+import model.results.CreateGameResult;
+import model.results.ListGamesResult;
 import model.results.LoginResult;
 import model.results.RegisterResult;
-import ui.EscapeSequences;
 import ui.PostLoginUI;
 import ui.PreLoginUI;
 import ui.UI;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ChessClient {
     private String authToken = null;
@@ -52,7 +55,7 @@ public class ChessClient {
                         if(args.length == 2){
                             LoginRequest request = new LoginRequest(args[0], args[1]);
 
-                            // Attempt to login the user and transition the UI to logged in
+                            // Attempt to log in the user and transition the UI to logged in
                             try{
                                 LoginResult result = server.login(request);
                                 authToken = result.authToken();
@@ -87,7 +90,91 @@ public class ChessClient {
                 }
             }
             else{
+                switch(option){
+                    case HELP -> ui.displayHelp();
+                    case LOGOUT -> {
+                        LogoutRequest request = new LogoutRequest(authToken);
 
+                        // Attempt to log out the user and transition the UI to logout
+                        try{
+                            server.logout(request);
+                            authToken = null;
+                            ui.displayMessage("Logout successful!");
+                            ui = new PreLoginUI();
+                            state = State.SIGNEDOUT;
+                        } catch (ResponseException e) {
+                            ui.displayError(e.getMessage());
+                        }
+                    }
+                    case CREATE -> {
+                        if (args.length == 1) {
+                            CreateGameRequest request = new CreateGameRequest(authToken, args[0]);
+
+                            // Attempt to create a game
+                            try{
+                                CreateGameResult result = server.createGame(request);
+                                ui.displayMessage("Game created successfully");
+                            } catch (ResponseException e) {
+                                ui.displayError(e.getMessage());
+                            }
+                        }
+                        else{
+                            ui.displayError("Incorrect arguments (Type help for correct formating)");
+                        }
+                    }
+                    case LIST -> {
+                        ListGamesRequest request = new ListGamesRequest(authToken);
+
+                        // Attempt to list games
+                        try{
+                            ListGamesResult result = server.listGames(request);
+                            ui.displayGames(result.games());
+                        } catch (ResponseException e) {
+                            ui.displayError(e.getMessage());
+                        }
+                    }
+                    case JOIN -> {
+                        if(args.length == 2) {
+                            ChessGame.TeamColor color = Objects.equals(args[1].toUpperCase(), "WHITE") ?
+                                ChessGame.TeamColor.WHITE :
+                                ChessGame.TeamColor.BLACK;
+                            JoinGameRequest request = new JoinGameRequest(
+                                    authToken,
+                                    color,
+                                    Integer.getInteger(args[0]));
+                            try {
+                                server.joinGame(request);
+                            } catch (ResponseException e) {
+                                ui.displayError(e.getMessage());
+                            }
+                        }
+                        else{
+                            ui.displayError("Incorrect arguments (Type help for correct formating)");
+                        }
+                    }
+                    case OBSERVE -> {
+                        if (args.length == 1) {
+
+                            ListGamesRequest request = new ListGamesRequest(authToken);
+
+                            // Attempt to list games
+                            try {
+                                ListGamesResult result = server.listGames(request);
+                                for (GameData data : result.games()) {
+                                    if (Integer.getInteger(args[0]) == data.gameID()) {
+                                        ui.displayGame(data);
+                                    }
+                                }
+
+                            }
+                            catch (ResponseException e) {
+                                ui.displayError(e.getMessage());
+                            }
+                        }
+                    }
+                    case UNKNOWN -> ui.displayError("Unknown Argument");
+
+                }
             }
         }
         // TODO exit message
