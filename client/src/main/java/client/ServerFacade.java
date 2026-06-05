@@ -2,6 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import model.GameData;
 import model.requests.*;
 import model.results.CreateGameResult;
 import model.results.ListGamesResult;
@@ -58,6 +59,17 @@ public class ServerFacade {
                 .toJson(request);
         HttpResponse<String> response = sendRequest(serverURL + "game", "PUT", body, request.authToken());
         checkResponse(response);
+    }
+    public GameData getGame(ListGamesRequest request, int gameID) throws ResponseException{
+        HttpResponse<String> response = sendRequest(serverURL + "game", "GET", null, request.authToken());
+        checkResponse(response);
+        ListGamesResult result = new Gson().fromJson(response.body(), ListGamesResult.class);
+        for(GameData data:result.games()){
+            if(gameID == data.gameID()){
+                return data;
+            }
+        }
+        throw new ResponseException("Something went wrong, please try again");
     }
 
 

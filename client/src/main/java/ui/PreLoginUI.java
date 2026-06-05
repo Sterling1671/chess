@@ -17,8 +17,32 @@ public class PreLoginUI implements UI{
 
     public void displayHelp(){
         System.out.println(
-                EscapeSequences.SET_TEXT_COLOR_DARK_GREY +
-                        "TODO help"
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "register <USERNAME> <PASSWORD> <EMAIL>" +
+                        EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                        " - registers you as a user and logs you in"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "login <USERNAME> <PASSWORD>" +
+                        EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                        " - logs you in"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "quit" +
+                        EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                        " - closes the application"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "help" +
+                        EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                        " - displays this menu"
+
         );
     }
 

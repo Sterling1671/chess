@@ -137,6 +137,13 @@ public class ChessClient {
                     }
                     case JOIN -> {
                         if(args.length == 2) {
+                            int gameID;
+                            try{
+                                gameID = Integer.parseInt(args[0]);
+                            } catch (NumberFormatException e) {
+                                ui.displayError("Please enter a valid Game ID");
+                                break;
+                            }
                             ChessGame.TeamColor color;
                             if(Objects.equals(args[1].toUpperCase(), "WHITE")){
                                 color = ChessGame.TeamColor.WHITE;
@@ -152,12 +159,28 @@ public class ChessClient {
                             JoinGameRequest request = new JoinGameRequest(
                                     authToken,
                                     color,
-                                    Integer.parseInt(args[0]));
+                                    gameID);
                             try {
                                 server.joinGame(request);
                                 ui.displayMessage("Game joined successfully");
                             } catch (ResponseException e) {
                                 ui.displayError(e.getMessage());
+                                break;
+                            }
+                            GameData game;
+                            try{
+                                ListGamesRequest requestGame = new ListGamesRequest(authToken);
+                                game = server.getGame(requestGame, gameID);
+                            }
+                            catch(ResponseException e){
+                                ui.displayError(e.getMessage());
+                                break;
+                            }
+                            if(color == ChessGame.TeamColor.WHITE){
+                                ui.displayGameBoardWhite(game);
+                            }
+                            else{
+                                ui.displayGameBoardBlack(game);
                             }
                         }
                         else{
@@ -198,6 +221,7 @@ public class ChessClient {
                             ui.displayError("Incorrect arguments (Type help for correct formating)");
                         }
                     }
+                    case QUIT -> running = false;
                     default -> ui.displayError("Unknown Argument");
 
                 }

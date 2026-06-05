@@ -17,8 +17,53 @@ public class PostLoginUI implements UI{
 
     public void displayHelp(){
         System.out.println(
-                EscapeSequences.SET_TEXT_COLOR_GREEN +
-                        "TODO help"
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "create <GAME NAME>" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - creates a game with the specified name"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "list" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - lists all games"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "join <GAME ID> <WHITE|BLACK>" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - joins the specified game as the specified color"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "observe <GAME ID>" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - observes the specified game"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "logout" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - logs you out of the service"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "quit" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - closes the application"
+
+        );
+        System.out.println(
+                EscapeSequences.SET_TEXT_COLOR_WHITE +
+                        "help" +
+                        EscapeSequences.SET_TEXT_COLOR_GREEN +
+                        " - displays this menu"
+
         );
     }
 
