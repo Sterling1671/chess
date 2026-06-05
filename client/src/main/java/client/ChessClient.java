@@ -109,51 +109,7 @@ public class ChessClient {
             }
             case JOIN -> {
                 if(args.length == 2) {
-                    int gameID;
-                    try{
-                        gameID = Integer.parseInt(args[0]);
-                    } catch (NumberFormatException e) {
-                        ui.displayError("Please enter a valid Game ID");
-                        break;
-                    }
-                    ChessGame.TeamColor color;
-                    if(Objects.equals(args[1].toUpperCase(), "WHITE")){
-                        color = ChessGame.TeamColor.WHITE;
-                    }
-                    else if(Objects.equals(args[1].toUpperCase(), "BLACK")){
-                        color = ChessGame.TeamColor.BLACK;
-                    }
-                    else{
-                        ui.displayError("Please enter a valid color;");
-                        break;
-                    }
-
-                    JoinGameRequest request = new JoinGameRequest(
-                            authToken,
-                            color,
-                            gameID);
-                    try {
-                        server.joinGame(request);
-                        ui.displayMessage("Game joined successfully");
-                    } catch (ResponseException e) {
-                        ui.displayError(e.getMessage());
-                        break;
-                    }
-                    GameData game;
-                    try{
-                        ListGamesRequest requestGame = new ListGamesRequest(authToken);
-                        game = server.getGame(requestGame, gameID);
-                    }
-                    catch(ResponseException e){
-                        ui.displayError(e.getMessage());
-                        break;
-                    }
-                    if(color == ChessGame.TeamColor.WHITE){
-                        ui.displayGameBoardWhite(game);
-                    }
-                    else{
-                        ui.displayGameBoardBlack(game);
-                    }
+                    joinGame(args);
                 }
                 else{
                     ui.displayError("Incorrect arguments (Type help for correct formating)");
@@ -171,21 +127,12 @@ public class ChessClient {
                         break;
                     }
                     // Attempt to list games
-                    try {
-                        ListGamesResult result = server.listGames(request);
-                        boolean failure = true;
-                        for (GameData data : result.games()) {
-                            if (gameID == data.gameID()) {
-                                ui.displayGameBoardWhite(data);
-                                failure = false;
-                            }
-                        }
-                        if(failure){
-                            ui.displayError("No game was found with that id");
-                        }
-
+                    try{
+                        ListGamesRequest requestGame = new ListGamesRequest(authToken);
+                        GameData game = server.getGame(requestGame, gameID);
+                        ui.displayGameBoardWhite(game);
                     }
-                    catch (ResponseException e) {
+                    catch(ResponseException e){
                         ui.displayError(e.getMessage());
                     }
                 }
@@ -196,6 +143,54 @@ public class ChessClient {
             case QUIT -> running = false;
             default -> ui.displayError("Unknown Argument");
 
+        }
+    }
+
+    private void joinGame(String[] args) {
+        int gameID;
+        try{
+            gameID = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            ui.displayError("Please enter a valid Game ID");
+            return;
+        }
+        ChessGame.TeamColor color;
+        if(Objects.equals(args[1].toUpperCase(), "WHITE")){
+            color = ChessGame.TeamColor.WHITE;
+        }
+        else if(Objects.equals(args[1].toUpperCase(), "BLACK")){
+            color = ChessGame.TeamColor.BLACK;
+        }
+        else{
+            ui.displayError("Please enter a valid color;");
+            return;
+        }
+
+        JoinGameRequest request = new JoinGameRequest(
+                authToken,
+                color,
+                gameID);
+        try {
+            server.joinGame(request);
+            ui.displayMessage("Game joined successfully");
+        } catch (ResponseException e) {
+            ui.displayError(e.getMessage());
+            return;
+        }
+        GameData game;
+        try{
+            ListGamesRequest requestGame = new ListGamesRequest(authToken);
+            game = server.getGame(requestGame, gameID);
+        }
+        catch(ResponseException e){
+            ui.displayError(e.getMessage());
+            return;
+        }
+        if(color == ChessGame.TeamColor.WHITE){
+            ui.displayGameBoardWhite(game);
+        }
+        else{
+            ui.displayGameBoardBlack(game);
         }
     }
 
