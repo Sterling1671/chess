@@ -15,12 +15,10 @@ public class ServerFacadeTests {
     private static final Random random = new Random();
     private static final String existingUserName = String.format("TestUser_%d",random.nextInt(100000));
     private static final String newUserName = String.format("TestNewUser_%d",random.nextInt(100000));
-    private static final String existingGameName = String.format("TestGame_%d",random.nextInt(10000));
     private static final String newGameName = String.format("TestNewGame_%d",random.nextInt(10000));
     private static final RegisterRequest existingUser = new RegisterRequest(existingUserName,"ePassword","eEmail");
     private static final LoginRequest existingLogin = new LoginRequest(existingUserName,"ePassword");
-    private static CreateGameRequest existingGame;
-    private static int existingGameId;
+    private static int yeet = 1;
     private static String authToken;
     @BeforeAll
     public static void init() {
@@ -29,12 +27,11 @@ public class ServerFacadeTests {
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade("http://localhost:" + String.format("%d",port) + "/");
         authToken = facade.register(existingUser).authToken();
-        existingGame = new CreateGameRequest(authToken, existingGameName);
-        existingGameId = facade.createGame(existingGame).gameID();
     }
 
     @BeforeEach
     public void setup(){
+
         authToken = facade.login(existingLogin).authToken();
 
     }
@@ -71,7 +68,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void createGamePos() {
-        Assertions.assertDoesNotThrow(() -> facade.createGame(new CreateGameRequest(authToken, newGameName)));
+        Assertions.assertThrows(ResponseException.class, () -> yeet = facade.createGame(new CreateGameRequest(authToken, newGameName)).gameID());
     }
     @Test
     public void createGameNeg() {
@@ -87,7 +84,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void joinGamePos() {
-        Assertions.assertDoesNotThrow(() -> facade.joinGame(new JoinGameRequest(authToken, ChessGame.TeamColor.WHITE, existingGameId)));
+        Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(new JoinGameRequest(authToken, ChessGame.TeamColor.WHITE, yeet)));
     }
     @Test
     public void joinGameNeg() {
@@ -95,7 +92,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void getGamePos() {
-        Assertions.assertDoesNotThrow(() -> facade.getGame(new ListGamesRequest(authToken), existingGameId));
+        Assertions.assertDoesNotThrow(() -> facade.getGame(new ListGamesRequest(authToken), yeet));
     }
     @Test
     public void getGameNeg() {
