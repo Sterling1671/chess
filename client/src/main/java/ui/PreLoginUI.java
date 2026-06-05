@@ -17,7 +17,7 @@ public class PreLoginUI implements UI{
 
     public void displayHelp(){
         System.out.println(
-                EscapeSequences.SET_TEXT_COLOR_MAGENTA +
+                EscapeSequences.SET_TEXT_COLOR_DARK_GREY +
                         "TODO help"
         );
     }
@@ -56,21 +56,5 @@ public class PreLoginUI implements UI{
                     String.format("%d",game.gameID()));
             count++;
         }
-    }
-
-    @Override
-    public void observeGame(GameData game) {
-        System.out.print(
-                EscapeSequences.SET_TEXT_COLOR_MAGENTA +
-                "Game name: ");
-        System.out.print(
-                EscapeSequences.SET_TEXT_COLOR_BLUE +
-                game.gameName());
-        System.out.print(
-                EscapeSequences.SET_TEXT_COLOR_MAGENTA +
-                " Game id: ");
-        System.out.println(
-                EscapeSequences.SET_TEXT_COLOR_BLUE +
-                String.format("%d",game.gameID()));
     }
 }

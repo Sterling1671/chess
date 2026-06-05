@@ -75,20 +75,4 @@ public class PostLoginUI implements UI{
             count++;
         }
     }
-
-    @Override
-    public void observeGame(GameData game) {
-        System.out.print(
-                EscapeSequences.SET_TEXT_COLOR_GREEN +
-                        "Game name: ");
-        System.out.print(
-                EscapeSequences.SET_TEXT_COLOR_BLUE +
-                        game.gameName());
-        System.out.print(
-                EscapeSequences.SET_TEXT_COLOR_GREEN +
-                        " Game id: ");
-        System.out.println(
-                EscapeSequences.SET_TEXT_COLOR_BLUE +
-                        String.format("%d",game.gameID()));
-    }
 }

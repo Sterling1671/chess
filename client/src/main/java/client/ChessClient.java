@@ -181,7 +181,7 @@ public class ChessClient {
                                 boolean failure = true;
                                 for (GameData data : result.games()) {
                                     if (gameID == data.gameID()) {
-                                        ui.observeGame(data);
+                                        ui.displayGameBoardWhite(data);
                                         failure = false;
                                     }
                                 }
