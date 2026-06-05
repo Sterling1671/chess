@@ -8,9 +8,9 @@ public class PreLoginUI implements UI{
 
     @Override
     public String receiveInput() {
-        String PRETEXT_MESSAGE =
+        String pretextMessage =
                 EscapeSequences.SET_TEXT_COLOR_MAGENTA + "[LOGGED_OUT] >>> ";
-        System.out.print(PRETEXT_MESSAGE);
+        System.out.print(pretextMessage);
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
     }

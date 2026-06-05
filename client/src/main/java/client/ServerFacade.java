@@ -15,7 +15,7 @@ import java.net.http.HttpResponse;
 
 public class ServerFacade {
     private final String serverURL;
-    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
 
     public ServerFacade(String url){
@@ -89,7 +89,7 @@ public class ServerFacade {
         requestHeaderBuilder(builder, "Authorization", authToken);
         HttpRequest request = builder.build();
         try {
-            return client.send(request, HttpResponse.BodyHandlers.ofString());
+            return CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         }
         catch(Exception e) {
             throw new ResponseException("Something went wrong, try again");
