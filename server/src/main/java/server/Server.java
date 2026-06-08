@@ -38,6 +38,7 @@ public class Server {
         javalinServer.post("/game", new CreateGameHandler());
         javalinServer.put("/game", new JoinGameHandler());
         javalinServer.delete("/db",new ClearGameHandler());
+        javalinServer.ws("/ws",new WsRequestHandler());
     }
     private void createExceptions(Javalin javalinServer){
         javalinServer.exception(JsonSyntaxException.class, new JsonSyntaxHandler());
