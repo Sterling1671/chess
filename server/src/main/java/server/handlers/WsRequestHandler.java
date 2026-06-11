@@ -1,6 +1,7 @@
 package server.handlers;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
 import org.jetbrains.annotations.NotNull;
 import service.WebSocketService;
@@ -24,7 +25,7 @@ public class WsRequestHandler implements Consumer<WsConfig> {
         System.out.println("Websocket connected");
     }
 
-    public void handleMessage(@NotNull WsMessageContext ctx) {
+    public void handleMessage(@NotNull WsMessageContext ctx) throws DataAccessException {
         Gson serializer = new Gson();
         UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
         switch(command.getCommandType()){
