@@ -155,14 +155,15 @@ public class WebSocketService {
 
         // leave the game if you are a player
         ChessGame.TeamColor color = getPlayerColor(game, auth);
-        if(color.equals(ChessGame.TeamColor.WHITE)){
+        if(color != null && color.equals(ChessGame.TeamColor.WHITE)){
             GameData gameToSave = new GameData(game, null, game.blackUsername());
             gameDAO.updateGame(gameToSave);
         }
-        else if(color.equals(ChessGame.TeamColor.BLACK)){
+        else if(color != null && color.equals(ChessGame.TeamColor.BLACK)){
             GameData gameToSave = new GameData(game, game.whiteUsername(), null);
             gameDAO.updateGame(gameToSave);
         }
+
 
         // remove your session from the connection manager
         connections.remove(game.gameID(), session);
