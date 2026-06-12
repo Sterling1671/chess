@@ -8,6 +8,7 @@ import service.WebSocketService;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 public class WsRequestHandler implements Consumer<WsConfig> {
@@ -25,7 +26,7 @@ public class WsRequestHandler implements Consumer<WsConfig> {
         System.out.println("Websocket connected");
     }
 
-    public void handleMessage(@NotNull WsMessageContext ctx) throws DataAccessException {
+    public void handleMessage(@NotNull WsMessageContext ctx) throws DataAccessException, IOException {
         Gson serializer = new Gson();
         UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
         switch(command.getCommandType()){
