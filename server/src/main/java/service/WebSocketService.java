@@ -32,23 +32,17 @@ public class WebSocketService {
     }
 
     public void connect(UserGameCommand command, Session session) throws DataAccessException, IOException {
-        String authToken = command.getAuthToken();
-        int gameID = command.getGameID();
+        GameData game = gameDAO.getGame(command.getGameID());
+        AuthData auth = authDAO.getAuth(command.getAuthToken());
+        // Check if authorized
+        String authError = checkIfAuthorized(game, auth, null);
+        if(authError != null){
+            connections.sendServerMsg(session, new ErrorMessage(authError));
+            return;
+        }
 
-        // Check if auth token exists
-        AuthData auth = authDAO.getAuth(authToken);
-        if(auth == null){
-            connections.sendServerMsg(session, new ErrorMessage("You aren't authorized"));
-            return;
-        }
-        // Check if gameID exists
-        GameData game = gameDAO.getGame(gameID);
-        if(game == null){
-            connections.sendServerMsg(session, new ErrorMessage("That gameID doesn't exist"));
-            return;
-        }
         // add the connection to the connection manager
-        connections.add(gameID, session);
+        connections.add(game.gameID(), session);
 
         // Loads the game on the users machine
         LoadGameMessage loadGameMessage = new LoadGameMessage(game.game());
@@ -73,16 +67,10 @@ public class WebSocketService {
         ChessMove move = command.getMove();
         GameData game = gameDAO.getGame(command.getGameID());
         AuthData auth = authDAO.getAuth(command.getAuthToken());
-
-        // Check if auth token exists
-        if(auth == null){
-            connections.sendServerMsg(session, new ErrorMessage("You aren't authorized"));
-            return;
-        }
-
-        // Check if gameID exists
-        if(game == null){
-            connections.sendServerMsg(session, new ErrorMessage("That gameID doesn't exist"));
+        // Check if authorized
+        String authError = checkIfAuthorized(game, auth, session);
+        if(authError != null){
+            connections.sendServerMsg(session, new ErrorMessage(authError));
             return;
         }
 
@@ -155,11 +143,69 @@ public class WebSocketService {
         }
 
     }
-    public void leave(UserGameCommand command, Session session){
+    public void leave(UserGameCommand command, Session session) throws DataAccessException, IOException {
+        GameData game = gameDAO.getGame(command.getGameID());
+        AuthData auth = authDAO.getAuth(command.getAuthToken());
+        // Check if authorized
+        String authError = checkIfAuthorized(game, auth, session);
+        if(authError != null){
+            connections.sendServerMsg(session, new ErrorMessage(authError));
+            return;
+        }
+
+        // leave the game if you are a player
+        ChessGame.TeamColor color = getPlayerColor(game, auth);
+        if(color.equals(ChessGame.TeamColor.WHITE)){
+            GameData gameToSave = new GameData(game, null, game.blackUsername());
+            gameDAO.updateGame(gameToSave);
+        }
+        else if(color.equals(ChessGame.TeamColor.BLACK)){
+            GameData gameToSave = new GameData(game, game.whiteUsername(), null);
+            gameDAO.updateGame(gameToSave);
+        }
+
+        // remove your session from the connection manager
+        connections.remove(game.gameID(), session);
+
+        // broadcast that you left
+        connections.broadcast(game.gameID(), null, new NotificationMessage(
+                String.format("%s has left the game", auth.username())
+        ));
+    }
+    public void resign(UserGameCommand command, Session session) throws DataAccessException, IOException {
+        GameData game = gameDAO.getGame(command.getGameID());
+        AuthData auth = authDAO.getAuth(command.getAuthToken());
+        // Check if authorized
+        String authError = checkIfAuthorized(game, auth, session);
+        if(authError != null){
+            connections.sendServerMsg(session, new ErrorMessage(authError));
+            return;
+        }
+
 
     }
-    public void resign(UserGameCommand command, Session session){
 
+    /**
+     * @param gameData the game data object returned by the SQL
+     * @param authData the auth data object returned by the SQL
+     * @param session the session that should be in the associated game connections(can be null)
+     * @return null if no errors, or a string containing the error message to be broadcast
+     */
+    private static String checkIfAuthorized(GameData gameData,  AuthData authData, Session session){
+        if(authData == null){
+            return "You aren't authorized";
+        }
+
+        // Check if gameID exists
+        if(gameData == null){
+            return "That gameID doesn't exist";
+        }
+
+        // Check that the player is joined
+        if(session != null && connections.connections.get(gameData.gameID()).get(session) == null){
+            return "You haven't joined that game";
+        }
+        return null;
     }
 
     /**

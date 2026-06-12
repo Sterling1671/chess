@@ -168,6 +168,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        // makes sure the game isn't over
+        if(gameIsOver) {throw new InvalidMoveException("The game is over");}
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece pieceToMove = board.getPiece(start);
