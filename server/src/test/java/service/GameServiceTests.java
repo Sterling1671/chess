@@ -37,25 +37,25 @@ class GameServiceTests {
         authDAO = new SQLAuthDAO();
         service = new GameService();
         gameHasNoPlayers = new GameData(
-                GameService.generateGameID(),
+                0,
                 null,
                 null,
                 "gameHasNoPlayers",
                 new ChessGame());
         gameHasBlackPlayer = new GameData(
-                GameService.generateGameID(),
+                0,
                 null,
                 "blackUsername",
                 "gameHasNoPlayers",
                 new ChessGame());
         gameHasWhitePlayer = new GameData(
-                GameService.generateGameID(),
+                0,
                 "whiteUsername",
                 null,
                 "gameHasNoPlayers",
                 new ChessGame());
         gameHasTwoPlayers = new GameData(
-                GameService.generateGameID(),
+                0,
                 "whiteUsername",
                 "blackUsername",
                 "gameHasNoPlayers",
@@ -85,10 +85,10 @@ class GameServiceTests {
         authDAO.createAuth(authorizedPlayer);
         authDAO.createAuth(authorizedWhitePlayer);
         authDAO.createAuth(authorizedBlackPlayer);
-        gameDAO.createGame(gameHasNoPlayers);
-        gameDAO.createGame(gameHasBlackPlayer);
-        gameDAO.createGame(gameHasWhitePlayer);
-        gameDAO.createGame(gameHasTwoPlayers);
+        gameHasNoPlayers = new GameData(gameHasNoPlayers, gameDAO.createGame(gameHasNoPlayers));
+        gameHasBlackPlayer = new GameData(gameHasBlackPlayer, gameDAO.createGame(gameHasBlackPlayer));
+        gameHasWhitePlayer = new GameData(gameHasWhitePlayer, gameDAO.createGame(gameHasWhitePlayer));
+        gameHasTwoPlayers = new GameData(gameHasTwoPlayers, gameDAO.createGame(gameHasTwoPlayers));
     }
 
     @Test
