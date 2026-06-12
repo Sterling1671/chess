@@ -33,10 +33,10 @@ public class WsRequestHandler implements Consumer<WsConfig> {
             case CONNECT -> service.connect(command, ctx.session);
             case LEAVE -> service.leave(command, ctx.session);
             case RESIGN -> service.resign(command, ctx.session);
-            case MAKE_MOVE -> service.makeMove(
-                    serializer.fromJson(ctx.message(), MakeMoveCommand.class),
-                    ctx.session
-            );
+            case MAKE_MOVE -> {
+                MakeMoveCommand moveCmd = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
+                service.makeMove(moveCmd, ctx.session);
+            }
         }
     }
 

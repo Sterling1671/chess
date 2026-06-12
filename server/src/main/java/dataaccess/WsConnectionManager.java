@@ -22,8 +22,8 @@ public class WsConnectionManager {
         connections.get(gameID).remove(session);
     }
 
-    public void broadcast(int gameID, Session excludeSession, NotificationMessage notification) throws IOException {
-        String msg = notification.toJson();
+    public void broadcast(int gameID, Session excludeSession, ServerMessage message) throws IOException {
+        String msg = message.toJson();
         for (Session c : connections.get(gameID).values()) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {

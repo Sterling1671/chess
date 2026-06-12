@@ -6,4 +6,7 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
     public GameData(GameData gameData, String whiteUsername, String blackUsername){
         this(gameData.gameID(), whiteUsername, blackUsername, gameData.gameName(), gameData.game);
     }
+    public GameData(GameData gameData, int gameID){
+        this(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game);
+    }
 }

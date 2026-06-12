@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -10,7 +12,6 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -67,7 +68,91 @@ public class WebSocketService {
 
 
 
-    public void makeMove(MakeMoveCommand command, Session session){
+    public void makeMove(MakeMoveCommand command, Session session) throws DataAccessException, IOException {
+
+        ChessMove move = command.getMove();
+        GameData game = gameDAO.getGame(command.getGameID());
+        AuthData auth = authDAO.getAuth(command.getAuthToken());
+
+        // Check if auth token exists
+        if(auth == null){
+            connections.sendServerMsg(session, new ErrorMessage("You aren't authorized"));
+            return;
+        }
+
+        // Check if gameID exists
+        if(game == null){
+            connections.sendServerMsg(session, new ErrorMessage("That gameID doesn't exist"));
+            return;
+        }
+
+        // Check that the game isn't over
+        if(game.game().isGameIsOver()){
+            connections.sendServerMsg(session, new ErrorMessage("That game is over"));
+            return;
+        }
+
+        // Check that the player is in the game
+        ChessGame.TeamColor color = getPlayerColor(game, auth);
+        if(color == null){
+            connections.sendServerMsg(session, new ErrorMessage("You're not a player in this game"));
+            return;
+        }
+
+        // Check that it's the players turn
+        if(game.game().getTeamTurn() != color){
+            connections.sendServerMsg(session, new ErrorMessage("It isn't your turn"));
+            return;
+        }
+
+        // Try to make the move
+        try{
+            game.game().makeMove(move);
+        } catch (InvalidMoveException e) {
+            connections.sendServerMsg(session, new ErrorMessage("That isn't a valid move"));
+            return;
+        }
+
+        // If everything else passes, update the database
+        gameDAO.updateGame(game);
+
+        // then broadcast the updated game to all parties
+        connections.broadcast(game.gameID(), null, new LoadGameMessage(game.game()));
+
+        // Send a notification with what move was made
+        connections.broadcast(game.gameID(), session, new NotificationMessage(
+                String.format("%s moved %s to %s",
+                        color.toString().substring(0, 1).toUpperCase() +
+                                color.toString().substring(1).toLowerCase(),
+                        move.getStartPosition().toString(),
+                        move.getEndPosition().toString()
+        )));
+
+        // Checks check conditions
+        ChessGame.TeamColor oppositeColor = color == ChessGame.TeamColor.WHITE ?
+                ChessGame.TeamColor.BLACK :
+                ChessGame.TeamColor.WHITE;
+
+        String oppositeColorString = oppositeColor.toString().substring(0, 1).toUpperCase() +
+                oppositeColor.toString().substring(1).toLowerCase();
+
+        if(game.game().isInCheckmate(oppositeColor)){
+            connections.broadcast(game.gameID(), null, new NotificationMessage(
+                    String.format("%s is in checkmate", oppositeColorString)
+            ));
+            game.game().setGameIsOver(true);
+        }
+        else if(game.game().isInStalemate(oppositeColor)){
+            connections.broadcast(game.gameID(), null, new NotificationMessage(
+                    "The game ends in a stalemate"
+            ));
+            game.game().setGameIsOver(true);
+        }
+        else if(game.game().isInCheck(oppositeColor)){
+            connections.broadcast(game.gameID(), null, new NotificationMessage(
+                    String.format("%s is in check", oppositeColorString)
+            ));
+        }
 
     }
     public void leave(UserGameCommand command, Session session){

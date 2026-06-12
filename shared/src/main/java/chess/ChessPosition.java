@@ -11,7 +11,7 @@ import java.util.Objects;
 public class ChessPosition {
 
     private final int row;
-    private final int col;
+    private final int column;
 
     @Override
     public boolean equals(Object o) {
@@ -19,22 +19,22 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return row == that.row && col == that.col;
+        return row == that.row && column == that.column;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(row, col);
+        return Objects.hash(row, column);
     }
 
-    public ChessPosition(int row, int col) {
+    public ChessPosition(int row, int column) {
         this.row = row;
-        this.col = col;
+        this.column = column;
     }
 
     public ChessPosition(ChessPosition other){
         this.row = other.getRow();
-        this.col = other.getColumn();
+        this.column = other.getColumn();
     }
 
     /**
@@ -50,14 +50,14 @@ public class ChessPosition {
      * 1 codes for the left column
      */
     public int getColumn() {
-        return col;
+        return column;
     }
 
     /**
      * @return a new ChessPosition that has rows and columns added with the current one
      */
     public ChessPosition add(ChessPosition other){
-        return new ChessPosition(row + other.getRow(), col + other.getColumn());
+        return new ChessPosition(row + other.getRow(), column + other.getColumn());
     }
 
     public boolean isInBounds(){
@@ -66,6 +66,6 @@ public class ChessPosition {
 
     @Override
     public String toString(){
-        return String.format("[%d,%d]", row, col);
+        return String.format("%c%d", 'a' + column - 1, row);
     }
 }

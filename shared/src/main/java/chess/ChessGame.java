@@ -15,6 +15,7 @@ public class ChessGame {
      ****************************************************************/
     ChessBoard board = new ChessBoard();
     TeamColor currentTeamTurn = TeamColor.WHITE;
+    boolean gameIsOver = false;
     Castling.MoveTracker whiteMoves = new Castling.MoveTracker(1);
     Castling.MoveTracker blackMoves = new Castling.MoveTracker(8);
 
@@ -60,6 +61,13 @@ public class ChessGame {
         return this.board;
     }
 
+    public void setGameIsOver(boolean gameIsOver) {
+        this.gameIsOver = gameIsOver;
+    }
+
+    public boolean isGameIsOver() {
+        return gameIsOver;
+    }
 
     // ****************************************************************
     // * UTIL FUNCTIONS
@@ -166,6 +174,11 @@ public class ChessGame {
 
         // Checks if piece exists
         if(pieceToMove == null) {throw new InvalidMoveException("Invalid Move");}
+
+        // check if the move is a move to itself
+        if (move.getStartPosition().equals(move.getEndPosition())) {
+            throw new InvalidMoveException("Invalid Move");
+        }
 
         // First checks if the move is a castle(set castle flag) or En Passant
         Castling.checkIfCastle(move, this.board);

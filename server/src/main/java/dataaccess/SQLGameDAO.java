@@ -16,7 +16,7 @@ public class SQLGameDAO implements GameDAO{
         String[] createStatements = {
                 """
             CREATE TABLE IF NOT EXISTS  games (
-              `id` INT NOT NULL,
+              `id` INT NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256) DEFAULT NULL,
               `blackUsername` varchar(256) DEFAULT NULL,
               `gameName` varchar(256) NOT NULL,
@@ -34,21 +34,29 @@ public class SQLGameDAO implements GameDAO{
     }
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
+    public int createGame(GameData gameData) throws DataAccessException { // Changed return type to int
+        String statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
+
         try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "INSERT INTO games (id, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement insertGameStatement = conn.prepareStatement(statement)) {
+            try (PreparedStatement insertGameStatement = conn.prepareStatement(statement, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 String serialized = new Gson().toJson(gameData.game());
 
-                insertGameStatement.setInt(1,gameData.gameID());
-                insertGameStatement.setString(2,gameData.whiteUsername());
-                insertGameStatement.setString(3,gameData.blackUsername());
-                insertGameStatement.setString(4,gameData.gameName());
-                insertGameStatement.setString(5,serialized);
+                insertGameStatement.setString(1, gameData.whiteUsername());
+                insertGameStatement.setString(2, gameData.blackUsername());
+                insertGameStatement.setString(3, gameData.gameName());
+                insertGameStatement.setString(4, serialized);
                 insertGameStatement.executeUpdate();
+
+                try (var generatedKeys = insertGameStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        return generatedKeys.getInt(1);
+                    } else {
+                        throw new DataAccessException("Creating game failed, no ID obtained.");
+                    }
+                }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Failed");
+            throw new DataAccessException(e.getMessage());
         }
     }
 

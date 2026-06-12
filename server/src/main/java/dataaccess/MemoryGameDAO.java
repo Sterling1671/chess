@@ -5,9 +5,11 @@ import model.GameData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemoryGameDAO implements GameDAO{
     private static final List<GameData> GAMES = new ArrayList<>();
+    AtomicInteger gameIDCounter = new AtomicInteger(1);
 
     @Override
     public void clear() {
@@ -15,8 +17,11 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void createGame(GameData gameData) {
+    public int createGame(GameData gameData) {
+        int gameId = gameIDCounter.getAndIncrement();
+        GameData gameToSave = new GameData(gameData, gameId);
         GAMES.add(gameData);
+        return gameId;
     }
 
     @Override

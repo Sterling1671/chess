@@ -12,8 +12,6 @@ import model.results.ListGamesResult;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class GameService {
@@ -26,21 +24,6 @@ public class GameService {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-    // The internet says I need to be thread safe for servers I guess
-    private static final AtomicInteger GAME_ID_COUNT = new AtomicInteger(1);
-    private static final ConcurrentLinkedQueue<Integer> RECYCLED_ID = new ConcurrentLinkedQueue<>();
-
-    /**
-     * Generates a unique game ID. Uses a queue to recycle old game IDs that aren't in use
-     * @return the new gameID to be used
-     */
-    public static int generateGameID(){
-        Integer id = RECYCLED_ID.poll();
-        if(id != null){
-            return id;
-        }
-        return GAME_ID_COUNT.getAndIncrement();
     }
 
     /**
@@ -66,9 +49,8 @@ public class GameService {
         AuthService.checkIfAuthorized(authToken);
 
         // If it is, make a new game with the requested game name
-        int gameID = GameService.generateGameID();
         GameData gameToSave = new GameData(
-          gameID,
+          0,
           null,
           null,
           gameName,
@@ -76,7 +58,7 @@ public class GameService {
         );
 
         // Save the game
-        GAME_DAO.createGame(gameToSave);
+        int gameID = GAME_DAO.createGame(gameToSave);
 
         return new CreateGameResult(gameID);
     }
@@ -144,8 +126,6 @@ public class GameService {
      * Clears the GameDAO associated with GameService
      */
     public void clear() throws DataAccessException {
-        GAME_ID_COUNT.set(1);
-        RECYCLED_ID.clear();
         GAME_DAO.clear();
     }
 }
