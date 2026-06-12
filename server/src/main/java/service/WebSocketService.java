@@ -182,7 +182,21 @@ public class WebSocketService {
             return;
         }
 
+        // Check if the session is an active player
+        ChessGame.TeamColor color = getPlayerColor(game, auth);
+        if(color == null){
+            connections.sendServerMsg(session, new ErrorMessage("You aren't a player in this game"));
+            return;
+        }
 
+        // Set the game to over and save it
+        game.game().setGameIsOver(true);
+        gameDAO.updateGame(game);
+
+        // broadcast the message
+        connections.broadcast(game.gameID(), null, new NotificationMessage(
+                String.format("%s has resigned. The game is over", auth.username())
+        ));
     }
 
     /**
