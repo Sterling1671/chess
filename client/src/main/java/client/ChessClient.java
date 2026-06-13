@@ -146,7 +146,6 @@ public class ChessClient {
                         ui = myInGameUI;
                         myInGameUI.setTeamColor(null);
                         myInGameUI.setChessGame(game.game());
-                        myInGameUI.displayGameBoard(null);
                         wsServer.sendCommand(authToken, myGameId, UserGameCommand.CommandType.CONNECT);
 
                         state = State.INGAME;
@@ -209,7 +208,6 @@ public class ChessClient {
         ui = myInGameUI;
         myInGameUI.setTeamColor(color);
         myInGameUI.setChessGame(game.game());
-        myInGameUI.displayGameBoard(null);
         wsServer.sendCommand(authToken, myGameId, UserGameCommand.CommandType.CONNECT);
         state = State.INGAME;
     }
