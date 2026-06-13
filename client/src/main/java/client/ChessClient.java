@@ -1,28 +1,38 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.GameData;
 import model.requests.*;
 import model.results.CreateGameResult;
 import model.results.ListGamesResult;
 import model.results.LoginResult;
 import model.results.RegisterResult;
+import ui.InGameUI;
 import ui.PostLoginUI;
 import ui.PreLoginUI;
 import ui.UI;
+import websocket.commands.UserGameCommand;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 public class ChessClient {
     private String authToken = null;
+    private int myGameId = 0;
     private final ServerFacade server;
+    private final WebSocketFacade wsServer;
     private State state = State.SIGNEDOUT;
+    private final InGameUI myInGameUI;
     UI ui;
     boolean running;
 
     public ChessClient(String serverUrl){
+        myInGameUI = new InGameUI();
         server = new ServerFacade(serverUrl);
+        wsServer = new WebSocketFacade(serverUrl,myInGameUI);
         ui = new PreLoginUI();
     }
 
@@ -58,8 +68,11 @@ public class ChessClient {
         if(state == State.SIGNEDOUT) {
             stateSingedOut(option, args);
         }
-        else{
+        else if(state == State.SIGNEDIN){
             stateSingedIn(option, args);
+        }
+        else{
+            stateInGame(option, args);
         }
     }
 
@@ -118,7 +131,6 @@ public class ChessClient {
             case OBSERVE -> {
                 if (args.length == 1) {
 
-                    ListGamesRequest request = new ListGamesRequest(authToken);
                     int gameID;
                     try{
                         gameID = Integer.parseInt(args[0]);
@@ -130,7 +142,11 @@ public class ChessClient {
                     try{
                         ListGamesRequest requestGame = new ListGamesRequest(authToken);
                         GameData game = server.getGame(requestGame, gameID);
-                        ui.displayGameBoardWhite(game);
+                        myGameId = gameID;
+                        myInGameUI.setTeamColor(null);
+                        myInGameUI.setChessGame(game.game());
+                        myInGameUI.displayGameBoard(null);
+                        state = State.INGAME;
                     }
                     catch(ResponseException e){
                         ui.displayError(e.getMessage());
@@ -186,12 +202,11 @@ public class ChessClient {
             ui.displayError(e.getMessage());
             return;
         }
-        if(color == ChessGame.TeamColor.WHITE){
-            ui.displayGameBoardWhite(game);
-        }
-        else{
-            ui.displayGameBoardBlack(game);
-        }
+        myGameId = gameID;
+        myInGameUI.setTeamColor(color);
+        myInGameUI.setChessGame(game.game());
+        myInGameUI.displayGameBoard(null);
+        state = State.INGAME;
     }
 
     private void stateSingedOut(Options option, String[] args) {
@@ -236,6 +251,77 @@ public class ChessClient {
                 }
             }
             default -> ui.displayError("Unknown Argument");
+        }
+    }
+
+    private void stateInGame(Options option, String[] args){
+        switch(option){
+            case REDRAW -> myInGameUI.displayGameBoard(null);
+            case LEAVE -> {
+                myInGameUI.setChessGame(null);
+                myInGameUI.setTeamColor(null);
+                wsServer.sendCommand(authToken, myGameId, UserGameCommand.CommandType.LEAVE);
+                myGameId = 0;
+                state = State.SIGNEDIN;
+            }
+            case MOVE -> {
+                if(args.length == 2){
+                    ChessMove move;
+                    try {
+                        ChessPosition startPosition = ChessPosition.fromString(args[0]);
+                        ChessPosition endPosition = ChessPosition.fromString(args[1]);
+                        move = new ChessMove(startPosition, endPosition, null);
+                    } catch (IllegalArgumentException e) {
+                        myInGameUI.displayError("Invalid move, try again");
+                        break;
+                    }
+                    try{
+                        wsServer.makeMove(authToken, myGameId, move);
+                    } catch (ResponseException e) {
+                        myInGameUI.displayError("Something went wrong, try again");
+
+                    }
+                }
+                else if(args.length == 3){
+                    ChessMove move;
+                    try {
+                        ChessPosition startPosition = ChessPosition.fromString(args[0]);
+                        ChessPosition endPosition = ChessPosition.fromString(args[1]);
+
+                        move = new ChessMove(
+                                startPosition,
+                                endPosition,
+                                ChessPiece.PieceType.valueOf(args[2].toUpperCase())
+                        );
+                    } catch (IllegalArgumentException e) {
+                        myInGameUI.displayError("Invalid move, try again");
+                        break;
+                    }
+                    try{
+                        wsServer.makeMove(authToken, myGameId, move);
+                    } catch (ResponseException e) {
+                        myInGameUI.displayError("Something went wrong, try again");
+
+                    }
+                }
+                else{
+                    myInGameUI.displayError("Please enter the correct number of arguments");
+                }
+            }
+            case RESIGN -> wsServer.sendCommand(authToken, myGameId, UserGameCommand.CommandType.RESIGN);
+            case HIGHLIGHT -> {
+                if(args.length == 1){
+                    ChessPosition positionToCheck;
+                    try {
+                        positionToCheck = ChessPosition.fromString(args[0]);
+                    } catch (IllegalArgumentException e) {
+                        myInGameUI.displayError("Please enter a valid chess position");
+                        break;
+                    }
+                    myInGameUI.displayGameBoard(positionToCheck);
+
+                }
+            }
         }
     }
 }

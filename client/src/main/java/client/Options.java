@@ -10,5 +10,10 @@ public enum Options {
     LIST,
     JOIN,
     OBSERVE,
+    REDRAW,
+    LEAVE,
+    MOVE,
+    RESIGN,
+    HIGHLIGHT,
     UNKNOWN
 }

@@ -2,8 +2,6 @@ package client;
 
 import websocket.messages.ServerMessage;
 
-public class WsServerMsgHandler {
-    public void handle(ServerMessage msg){
-
-    }
+public interface WsServerMsgHandler {
+    void handle(ServerMessage msg);
 }

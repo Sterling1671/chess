@@ -1,12 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public interface UI {
@@ -16,26 +15,64 @@ public interface UI {
     void displayMessage(String message);
     void displayGames(Collection<GameData> games);
 
-    default void displayGameBoardWhite(GameData game){
-        ChessBoard board = game.game().getBoard();
-        for(int row = 0; row < 10; row++){
-            for(int col = 0; col < 10; col++){
-                displayBoardFromPos(board, row, col);
-            }
-            System.out.println(EscapeSequences.RESET_BG_COLOR);
+    default void displayGameBoard(ChessGame game, ChessPosition positionToCheck, ChessGame.TeamColor color){
+        if(ChessGame.TeamColor.BLACK.equals(color)){
+            displayGameBoardBlack(game, positionToCheck);
         }
-    }
-    default void displayGameBoardBlack(GameData game){
-        ChessBoard board = game.game().getBoard();
-        for(int row = 9; row >= 0; row--){
-            for(int col = 9; col >= 0; col--){
-                displayBoardFromPos(board, row, col);
-            }
-            System.out.println(EscapeSequences.RESET_BG_COLOR);
+        else{
+            displayGameBoardWhite(game, positionToCheck);
         }
     }
 
-    default void displayBoardFromPos(ChessBoard board, int row, int col) {
+    default void displayGameBoardWhite(ChessGame game, ChessPosition positionToCheck){
+        ChessBoard board = game.getBoard();
+        if(positionToCheck != null) {
+            List<ChessMove> allValidMoves = new ArrayList<>(game.validMoves(positionToCheck));
+            for (int row = 0; row < 10; row++) {
+                for (int col = 0; col < 10; col++) {
+                    displayBoardFromPos(board, row, col,
+                            allValidMoves.contains(new ChessMove(positionToCheck,
+                                    new ChessPosition(row + 1, col + 1),
+                                    null)));
+                }
+                System.out.println(EscapeSequences.RESET_BG_COLOR);
+            }
+        }
+        else{
+            for (int row = 0; row < 10; row++) {
+                for (int col = 0; col < 10; col++) {
+                    displayBoardFromPos(board, row, col, false);
+                }
+                System.out.println(EscapeSequences.RESET_BG_COLOR);
+            }
+        }
+    }
+
+    default void displayGameBoardBlack(ChessGame game, ChessPosition positionToCheck){
+        ChessBoard board = game.getBoard();
+        if(positionToCheck != null) {
+            List<ChessMove> allValidMoves = new ArrayList<>(game.validMoves(positionToCheck));
+            for (int row = 9; row >= 0; row--) {
+                for (int col = 9; col >= 0; col--) {
+                    displayBoardFromPos(board, row, col,
+                            allValidMoves.contains(new ChessMove(positionToCheck,
+                                    new ChessPosition(row + 1, col + 1),
+                                    null)));
+                }
+                System.out.println(EscapeSequences.RESET_BG_COLOR);
+            }
+        }
+        else{
+            for (int row = 9; row >= 0; row--) {
+                for (int col = 9; col >= 0; col--) {
+                    displayBoardFromPos(board, row, col, false);
+                }
+                System.out.println(EscapeSequences.RESET_BG_COLOR);
+            }
+        }
+    }
+
+    default void displayBoardFromPos(ChessBoard board, int row, int col, boolean highlight) {
         if(row == 0 | row == 9 | col == 0 | col == 9){
             String borderToString = getChessBorder(row, col);
             System.out.print(borderToString);
@@ -43,8 +80,12 @@ public interface UI {
         else{
             String pieceToString = getChessPiece(board.getPiece(new ChessPosition(row, col)));
             String backgroundColor = (row + col) % 2 == 0 ?
-                    EscapeSequences.SET_BG_COLOR_LIGHT_GREY :
-                    EscapeSequences.SET_BG_COLOR_DARK_GREY;
+                (highlight ?
+                    EscapeSequences.SET_BG_COLOR_GREEN :
+                    EscapeSequences.SET_BG_COLOR_LIGHT_GREY) :
+                (highlight ?
+                    EscapeSequences.SET_BG_COLOR_DARK_GREEN :
+                    EscapeSequences.SET_BG_COLOR_DARK_GREY);
             System.out.print(backgroundColor + pieceToString);
         }
     }

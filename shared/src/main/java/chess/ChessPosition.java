@@ -68,4 +68,24 @@ public class ChessPosition {
     public String toString(){
         return String.format("%c%d", 'a' + column - 1, row);
     }
+
+    public static ChessPosition fromString(String positionStr) throws IllegalArgumentException{
+        if (positionStr == null || positionStr.length() != 2) {
+            throw new IllegalArgumentException("Invalid chess position format. Expected exactly 2 characters (e.g., 'a1')");
+        }
+
+        // Extract the characters
+        char colChar = positionStr.charAt(0); // 'a' through 'h'
+        char rowChar = positionStr.charAt(1); // '1' through '8'
+
+        // Convert char to 1-indexed integers using char arithmetic
+        int col = colChar - 'a' + 1;
+        int row = rowChar - '1' + 1;
+
+        if (col < 1 || col > 8 || row < 1 || row > 8) {
+            throw new IllegalArgumentException("Position out of chess board bounds");
+        }
+
+        return new ChessPosition(row, col);
+    }
 }
