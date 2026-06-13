@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import chess.ChessPosition;
 import client.WsServerMsgHandler;
+import com.google.gson.Gson;
 import model.GameData;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -116,12 +117,22 @@ public class InGameUI implements UI, WsServerMsgHandler {
     }
 
     @Override
-    public void handle(ServerMessage msg) {
-        switch(msg){
-            case NotificationMessage n -> displayMessage(n.getMessage());
-            case ErrorMessage e -> displayError(e.getErrorMessage());
-            case LoadGameMessage l -> displayGameBoard(l.getGame(), null, teamColor);
-            default -> displayError("Something went wrong, please try again");
+    public void handle(String msgJSON) {
+        ServerMessage msg = new Gson().fromJson(msgJSON, ServerMessage.class);
+        switch(msg.getServerMessageType()){
+            case NOTIFICATION -> {
+                NotificationMessage n = new Gson().fromJson(msgJSON, NotificationMessage.class);
+                displayMessage(n.getMessage());
+            }
+            case ERROR -> {
+                ErrorMessage e = new Gson().fromJson(msgJSON, ErrorMessage.class);
+                displayError(e.getErrorMessage());
+            }
+            case LOAD_GAME -> {
+                LoadGameMessage l = new Gson().fromJson(msgJSON, LoadGameMessage.class);
+                displayGameBoard(l.getGame(), null, teamColor);
+            }
+            default -> displayError(msg.toJson());
         }
     }
 }
