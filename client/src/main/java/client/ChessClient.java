@@ -281,7 +281,7 @@ public class ChessClient {
                     try{
                         wsServer.makeMove(authToken, myGameId, move);
                     } catch (ResponseException e) {
-                        myInGameUI.displayError("Something went wrong, try again");
+                        myInGameUI.displayError(e.getMessage());
 
                     }
                 }
@@ -303,7 +303,7 @@ public class ChessClient {
                     try{
                         wsServer.makeMove(authToken, myGameId, move);
                     } catch (ResponseException e) {
-                        myInGameUI.displayError("Something went wrong, try again");
+                        myInGameUI.displayError(e.getMessage());
 
                     }
                 }

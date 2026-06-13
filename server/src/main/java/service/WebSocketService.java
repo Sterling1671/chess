@@ -16,6 +16,7 @@ import websocket.messages.NotificationMessage;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketService {
     private static final WsConnectionManager connections = new WsConnectionManager();
@@ -217,6 +218,9 @@ public class WebSocketService {
         }
 
         // Check that the player is joined
+        connections.connections.computeIfAbsent(
+                gameData.gameID(),
+                k -> new ConcurrentHashMap<Session, Session>());
         if(session != null && connections.connections.get(gameData.gameID()).get(session) == null){
             return "You haven't joined that game";
         }

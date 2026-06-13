@@ -32,7 +32,7 @@ public interface UI {
                 for (int col = 0; col < 10; col++) {
                     displayBoardFromPos(board, row, col,
                             allValidMoves.contains(new ChessMove(positionToCheck,
-                                    new ChessPosition(row + 1, col + 1),
+                                    new ChessPosition(9 - row, col),
                                     null)));
                 }
                 System.out.println(EscapeSequences.RESET_BG_COLOR);
@@ -56,7 +56,7 @@ public interface UI {
                 for (int col = 9; col >= 0; col--) {
                     displayBoardFromPos(board, row, col,
                             allValidMoves.contains(new ChessMove(positionToCheck,
-                                    new ChessPosition(row + 1, col + 1),
+                                    new ChessPosition(row + 2, col + 2),
                                     null)));
                 }
                 System.out.println(EscapeSequences.RESET_BG_COLOR);
