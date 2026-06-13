@@ -191,6 +191,12 @@ public class WebSocketService {
             return;
         }
 
+        // Make sure the game isn't already over
+        if(game.game().isGameIsOver()){
+            connections.sendServerMsg(session, new ErrorMessage("This game is already over"));
+            return;
+        }
+
         // Set the game to over and save it
         game.game().setGameIsOver(true);
         gameDAO.updateGame(game);
