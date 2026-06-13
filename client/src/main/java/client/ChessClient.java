@@ -143,6 +143,7 @@ public class ChessClient {
                         ListGamesRequest requestGame = new ListGamesRequest(authToken);
                         GameData game = server.getGame(requestGame, gameID);
                         myGameId = gameID;
+                        ui = myInGameUI;
                         myInGameUI.setTeamColor(null);
                         myInGameUI.setChessGame(game.game());
                         myInGameUI.displayGameBoard(null);
@@ -203,6 +204,7 @@ public class ChessClient {
             return;
         }
         myGameId = gameID;
+        ui = myInGameUI;
         myInGameUI.setTeamColor(color);
         myInGameUI.setChessGame(game.game());
         myInGameUI.displayGameBoard(null);
@@ -262,6 +264,7 @@ public class ChessClient {
                 myInGameUI.setTeamColor(null);
                 wsServer.sendCommand(authToken, myGameId, UserGameCommand.CommandType.LEAVE);
                 myGameId = 0;
+                ui = new PostLoginUI();
                 state = State.SIGNEDIN;
             }
             case MOVE -> {
@@ -319,9 +322,10 @@ public class ChessClient {
                         break;
                     }
                     myInGameUI.displayGameBoard(positionToCheck);
-
                 }
             }
+            case HELP -> myInGameUI.displayHelp();
+            default -> myInGameUI.displayError("Please enter a valid option");
         }
     }
 }

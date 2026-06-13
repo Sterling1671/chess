@@ -19,7 +19,7 @@ public class WebSocketFacade extends Endpoint {
     public WebSocketFacade(String url, WsServerMsgHandler handler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
-            URI socketURI = new URI(url + "/ws");
+            URI socketURI = new URI(url + "ws");
             this.msgHandler = handler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
