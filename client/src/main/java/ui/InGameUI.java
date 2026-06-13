@@ -98,17 +98,20 @@ public class InGameUI implements UI, WsServerMsgHandler {
     @Override
     public void displayError(String error) {
         System.out.println(
+                "\n" +
                 EscapeSequences.SET_TEXT_COLOR_RED +
                         "Error: "+
                         error
         );
+        printPrompt();
     }
 
     @Override
     public void displayMessage(String message) {
         System.out.println(
-                EscapeSequences.SET_TEXT_COLOR_GREEN + message
+                "\n" + EscapeSequences.SET_TEXT_COLOR_GREEN + message
         );
+        printPrompt();
     }
 
     @Override
@@ -134,5 +137,20 @@ public class InGameUI implements UI, WsServerMsgHandler {
             }
             default -> displayError(msg.toJson());
         }
+    }
+    private void printPrompt() {
+        System.out.print("\n" + EscapeSequences.SET_TEXT_COLOR_GREEN + "[GAMEPLAY] >>> ");
+    }
+
+    @Override
+    public void displayGameBoard(ChessGame game, ChessPosition positionToCheck, ChessGame.TeamColor color){
+        System.out.print("\n");
+        if(ChessGame.TeamColor.BLACK.equals(color)){
+            displayGameBoardBlack(game, positionToCheck);
+        }
+        else{
+            displayGameBoardWhite(game, positionToCheck);
+        }
+        printPrompt();
     }
 }
