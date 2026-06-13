@@ -83,14 +83,14 @@ public class InGameUI implements UI, WsServerMsgHandler {
                 EscapeSequences.SET_TEXT_COLOR_WHITE +
                         "quit" +
                         EscapeSequences.SET_TEXT_COLOR_GREEN +
-                        " - closes the application"
+                        " - closes the application immediately"
 
         );
         System.out.println(
                 EscapeSequences.SET_TEXT_COLOR_WHITE +
                         "help" +
                         EscapeSequences.SET_TEXT_COLOR_GREEN +
-                        " - displays this menu"
+                        " - displays this menu with options for in game commands"
 
         );
     }

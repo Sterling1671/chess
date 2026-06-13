@@ -12,12 +12,12 @@ public class ServerFacadeTests {
 
     private static Server server;
     static ServerFacade facade;
-    private static final Random random = new Random();
-    private static final String existingUserName = String.format("TestUser_%d",random.nextInt(100000));
-    private static final String newUserName = String.format("TestNewUser_%d",random.nextInt(100000));
-    private static final String newGameName = String.format("TestNewGame_%d",random.nextInt(10000));
-    private static final RegisterRequest existingUser = new RegisterRequest(existingUserName,"ePassword","eEmail");
-    private static final LoginRequest existingLogin = new LoginRequest(existingUserName,"ePassword");
+    private static final Random RANDOM = new Random();
+    private static final String EXISTING_USER_NAME = String.format("TestUser_%d", RANDOM.nextInt(100000));
+    private static final String NEW_USER_NAME = String.format("TestNewUser_%d", RANDOM.nextInt(100000));
+    private static final String NEW_GAME_NAME = String.format("TestNewGame_%d", RANDOM.nextInt(10000));
+    private static final RegisterRequest EXISTING_USER = new RegisterRequest(EXISTING_USER_NAME,"ePassword","eEmail");
+    private static final LoginRequest EXISTING_LOGIN = new LoginRequest(EXISTING_USER_NAME,"ePassword");
     private static int yeet = 1;
     private static String authToken;
     @BeforeAll
@@ -26,13 +26,13 @@ public class ServerFacadeTests {
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade("http://localhost:" + String.format("%d",port) + "/");
-        authToken = facade.register(existingUser).authToken();
+        authToken = facade.register(EXISTING_USER).authToken();
     }
 
     @BeforeEach
     public void setup(){
 
-        authToken = facade.login(existingLogin).authToken();
+        authToken = facade.login(EXISTING_LOGIN).authToken();
 
     }
 
@@ -44,7 +44,7 @@ public class ServerFacadeTests {
 
     @Test
     public void loginPos() {
-        Assertions.assertDoesNotThrow(() -> facade.login(existingLogin));
+        Assertions.assertDoesNotThrow(() -> facade.login(EXISTING_LOGIN));
     }
     @Test
     public void loginNeg() {
@@ -52,11 +52,11 @@ public class ServerFacadeTests {
     }
     @Test
     public void regPos() {
-        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest(newUserName,"newTestPassword", "newTestEmail")));
+        Assertions.assertDoesNotThrow(() -> facade.register(new RegisterRequest(NEW_USER_NAME,"newTestPassword", "newTestEmail")));
     }
     @Test
     public void regNeg() {
-        Assertions.assertThrows(ResponseException.class, () -> facade.register(existingUser));
+        Assertions.assertThrows(ResponseException.class, () -> facade.register(EXISTING_USER));
     }
     @Test
     public void logoutPos() {
@@ -68,7 +68,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void createGamePos() {
-        Assertions.assertThrows(ResponseException.class, () -> yeet = facade.createGame(new CreateGameRequest(authToken, newGameName)).gameID());
+        Assertions.assertThrows(ResponseException.class, () -> yeet = facade.createGame(new CreateGameRequest(authToken, NEW_GAME_NAME)).gameID());
     }
     @Test
     public void createGameNeg() {
@@ -88,7 +88,8 @@ public class ServerFacadeTests {
     }
     @Test
     public void joinGameNeg() {
-        Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, random.nextInt(10000))));
+        Assertions.assertThrows(ResponseException.class, () -> facade.joinGame(
+                new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, RANDOM.nextInt(10000))));
     }
     @Test
     public void getGamePos() {
@@ -96,7 +97,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void getGameNeg() {
-        Assertions.assertThrows(ResponseException.class, () -> facade.getGame(new ListGamesRequest(authToken), random.nextInt(10000)));
+        Assertions.assertThrows(ResponseException.class, () -> facade.getGame(new ListGamesRequest(authToken), RANDOM.nextInt(10000)));
     }
 
 }

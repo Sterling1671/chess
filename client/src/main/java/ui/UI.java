@@ -32,14 +32,7 @@ public interface UI {
 
         for (int row = 9; row >= 0; row--) {
             for (int col = 0; col < 10; col++) {
-                boolean highlight = false;
-                for(ChessMove move : allValidMoves) {
-                    if(move.getEndPosition().getRow() == row && move.getEndPosition().getColumn() == col) {
-                        highlight = true;
-                        break;
-                    }
-                }
-                displayBoardFromPos(board, row, col, highlight);
+                displayBoardWithHighlight(allValidMoves, row, col, board);
             }
             System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
         }
@@ -53,17 +46,21 @@ public interface UI {
 
         for (int row = 0; row < 10; row++) {
             for (int col = 9; col >= 0; col--) {
-                boolean highlight = false;
-                for(ChessMove move : allValidMoves) {
-                    if(move.getEndPosition().getRow() == row && move.getEndPosition().getColumn() == col) {
-                        highlight = true;
-                        break;
-                    }
-                }
-                displayBoardFromPos(board, row, col, highlight);
+                displayBoardWithHighlight(allValidMoves, row, col, board);
             }
             System.out.println(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
         }
+    }
+
+    private void displayBoardWithHighlight(List<ChessMove> allValidMoves, int row, int col, ChessBoard board) {
+        boolean highlight = false;
+        for(ChessMove move : allValidMoves) {
+            if(move.getEndPosition().getRow() == row && move.getEndPosition().getColumn() == col) {
+                highlight = true;
+                break;
+            }
+        }
+        displayBoardFromPos(board, row, col, highlight);
     }
 
     default void displayBoardFromPos(ChessBoard board, int row, int col, boolean highlight) {

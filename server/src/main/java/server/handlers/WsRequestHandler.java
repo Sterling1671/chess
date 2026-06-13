@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 public class WsRequestHandler implements Consumer<WsConfig> {
-    private static final WebSocketService service = new WebSocketService();
+    private static final WebSocketService SERVICE = new WebSocketService();
 
     @Override
     public void accept(WsConfig wsConfig) {
@@ -30,12 +30,12 @@ public class WsRequestHandler implements Consumer<WsConfig> {
         Gson serializer = new Gson();
         UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
         switch(command.getCommandType()){
-            case CONNECT -> service.connect(command, ctx.session);
-            case LEAVE -> service.leave(command, ctx.session);
-            case RESIGN -> service.resign(command, ctx.session);
+            case CONNECT -> SERVICE.connect(command, ctx.session);
+            case LEAVE -> SERVICE.leave(command, ctx.session);
+            case RESIGN -> SERVICE.resign(command, ctx.session);
             case MAKE_MOVE -> {
                 MakeMoveCommand moveCmd = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
-                service.makeMove(moveCmd, ctx.session);
+                SERVICE.makeMove(moveCmd, ctx.session);
             }
         }
     }

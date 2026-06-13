@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketService {
-    private static final WsConnectionManager connections = new WsConnectionManager();
+    private static final WsConnectionManager CONNECTIONS = new WsConnectionManager();
     private static AuthDAO authDAO;
     private static GameDAO gameDAO;
 
@@ -38,16 +38,16 @@ public class WebSocketService {
         // Check if authorized
         String authError = checkIfAuthorized(game, auth, null);
         if(authError != null){
-            connections.sendServerMsg(session, new ErrorMessage(authError));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage(authError));
             return;
         }
 
         // add the connection to the connection manager
-        connections.add(game.gameID(), session);
+        CONNECTIONS.add(game.gameID(), session);
 
         // Loads the game on the users machine
         LoadGameMessage loadGameMessage = new LoadGameMessage(game.game());
-        connections.sendServerMsg(session, loadGameMessage);
+        CONNECTIONS.sendServerMsg(session, loadGameMessage);
 
         // Gets the color the user is playing as(or null)
         ChessGame.TeamColor color = getPlayerColor(game, auth);
@@ -58,7 +58,7 @@ public class WebSocketService {
                         auth.username(),
                         color.toString().toLowerCase(Locale.ROOT));
 
-        connections.broadcast(game.gameID(),session, new NotificationMessage(msgToSend));
+        CONNECTIONS.broadcast(game.gameID(),session, new NotificationMessage(msgToSend));
     }
 
 
@@ -71,26 +71,26 @@ public class WebSocketService {
         // Check if authorized
         String authError = checkIfAuthorized(game, auth, session);
         if(authError != null){
-            connections.sendServerMsg(session, new ErrorMessage(authError));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage(authError));
             return;
         }
 
         // Check that the game isn't over
         if(game.game().isGameIsOver()){
-            connections.sendServerMsg(session, new ErrorMessage("That game is over"));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage("That game is over"));
             return;
         }
 
         // Check that the player is in the game
         ChessGame.TeamColor color = getPlayerColor(game, auth);
         if(color == null){
-            connections.sendServerMsg(session, new ErrorMessage("You're not a player in this game"));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage("You're not a player in this game"));
             return;
         }
 
         // Check that it's the players turn
         if(game.game().getTeamTurn() != color){
-            connections.sendServerMsg(session, new ErrorMessage("It isn't your turn"));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage("It isn't your turn"));
             return;
         }
 
@@ -98,7 +98,7 @@ public class WebSocketService {
         try{
             game.game().makeMove(move);
         } catch (InvalidMoveException e) {
-            connections.sendServerMsg(session, new ErrorMessage("That isn't a valid move"));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage("That isn't a valid move"));
             return;
         }
 
@@ -106,10 +106,10 @@ public class WebSocketService {
         gameDAO.updateGame(game);
 
         // then broadcast the updated game to all parties
-        connections.broadcast(game.gameID(), null, new LoadGameMessage(game.game()));
+        CONNECTIONS.broadcast(game.gameID(), null, new LoadGameMessage(game.game()));
 
         // Send a notification with what move was made
-        connections.broadcast(game.gameID(), session, new NotificationMessage(
+        CONNECTIONS.broadcast(game.gameID(), session, new NotificationMessage(
                 String.format("%s moved %s to %s",
                         color.toString().substring(0, 1).toUpperCase() +
                                 color.toString().substring(1).toLowerCase(),
@@ -126,19 +126,19 @@ public class WebSocketService {
                 oppositeColor.toString().substring(1).toLowerCase();
 
         if(game.game().isInCheckmate(oppositeColor)){
-            connections.broadcast(game.gameID(), null, new NotificationMessage(
+            CONNECTIONS.broadcast(game.gameID(), null, new NotificationMessage(
                     String.format("%s is in checkmate", oppositeColorString)
             ));
             game.game().setGameIsOver(true);
         }
         else if(game.game().isInStalemate(oppositeColor)){
-            connections.broadcast(game.gameID(), null, new NotificationMessage(
+            CONNECTIONS.broadcast(game.gameID(), null, new NotificationMessage(
                     "The game ends in a stalemate"
             ));
             game.game().setGameIsOver(true);
         }
         else if(game.game().isInCheck(oppositeColor)){
-            connections.broadcast(game.gameID(), null, new NotificationMessage(
+            CONNECTIONS.broadcast(game.gameID(), null, new NotificationMessage(
                     String.format("%s is in check", oppositeColorString)
             ));
         }
@@ -150,7 +150,7 @@ public class WebSocketService {
         // Check if authorized
         String authError = checkIfAuthorized(game, auth, session);
         if(authError != null){
-            connections.sendServerMsg(session, new ErrorMessage(authError));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage(authError));
             return;
         }
 
@@ -167,10 +167,10 @@ public class WebSocketService {
 
 
         // remove your session from the connection manager
-        connections.remove(game.gameID(), session);
+        CONNECTIONS.remove(game.gameID(), session);
 
         // broadcast that you left
-        connections.broadcast(game.gameID(), null, new NotificationMessage(
+        CONNECTIONS.broadcast(game.gameID(), null, new NotificationMessage(
                 String.format("%s has left the game", auth.username())
         ));
     }
@@ -180,20 +180,20 @@ public class WebSocketService {
         // Check if authorized
         String authError = checkIfAuthorized(game, auth, session);
         if(authError != null){
-            connections.sendServerMsg(session, new ErrorMessage(authError));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage(authError));
             return;
         }
 
         // Check if the session is an active player
         ChessGame.TeamColor color = getPlayerColor(game, auth);
         if(color == null){
-            connections.sendServerMsg(session, new ErrorMessage("You aren't a player in this game"));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage("You aren't a player in this game"));
             return;
         }
 
         // Make sure the game isn't already over
         if(game.game().isGameIsOver()){
-            connections.sendServerMsg(session, new ErrorMessage("This game is already over"));
+            CONNECTIONS.sendServerMsg(session, new ErrorMessage("This game is already over"));
             return;
         }
 
@@ -202,7 +202,7 @@ public class WebSocketService {
         gameDAO.updateGame(game);
 
         // broadcast the message
-        connections.broadcast(game.gameID(), null, new NotificationMessage(
+        CONNECTIONS.broadcast(game.gameID(), null, new NotificationMessage(
                 String.format("%s has resigned. The game is over", auth.username())
         ));
     }
@@ -224,10 +224,10 @@ public class WebSocketService {
         }
 
         // Check that the player is joined
-        connections.connections.computeIfAbsent(
+        CONNECTIONS.connections.computeIfAbsent(
                 gameData.gameID(),
                 k -> new ConcurrentHashMap<Session, Session>());
-        if(session != null && connections.connections.get(gameData.gameID()).get(session) == null){
+        if(session != null && CONNECTIONS.connections.get(gameData.gameID()).get(session) == null){
             return "You haven't joined that game";
         }
         return null;
